@@ -25,6 +25,7 @@ public class ChatDemo {
     //实现基础对话
     @GetMapping(value = "/chat")
     public String generation(String userInput) {
+
         ChatClient.ChatClientRequestSpec prompt = chatClient.prompt();
 
         ChatClient.ChatClientRequestSpec user = prompt.user(userInput);
@@ -36,6 +37,18 @@ public class ChatDemo {
         String content = call.content();//大模型的返回信息
         System.out.println(content);
         return content;
+
+        //return this.chatClient.prompt().user(userInput).call().content();
     }
 
+    //提示词工程
+    @GetMapping(value = "/chat/role")
+    public String generatePrompt(String userInput, String role) {
+        ChatClient.ChatClientRequestSpec prompt = chatClient.prompt();
+        ChatClient.ChatClientRequestSpec system = prompt.system(role);
+        ChatClient.ChatClientRequestSpec user = system.user(userInput);
+        ChatClient.CallResponseSpec call = user.call();
+        String content = call.content();
+        return content;
+    }
 }
