@@ -2,7 +2,7 @@
 #### 版本说明：Spring Boot4.0 + Spring AI 2.0 ， JDK必须使用 JDK25
 
 
-## 第一天：pom.xml配置文件
+## 第一天：项目配置解析
 
 ### 1.SpringBoot 依赖
 
@@ -94,7 +94,10 @@
 - 在 controller包中新建一个 Java Class ChatDemo.java
 
 
-        @RestController  // TODO：@ResponseBody + @Controller 注解，将数据以JSON发送给前端，不让返回值经过试图解析器（解析HTML代码的容器）
+        @RestController  // TODO：等同于 @ResponseBody + @Controller 注解，将数据以JSON发送给前端，不让返回值经过试图解析器（解析HTML代码的容器）
+        //@ResponseBody
+        //@Controller
+        // TODO： @ResponseBody：将数据以JSON格式返回给前端（html页面），@Controller ：将Java来标注为一个控制器类（控制器数据请求和转发）
         // TODO：请求地址，启动父服务器输入本地地址：127.0.0.1:服务器端口号8080/请求地址
         @RequestMapping(value = "/api")    // TODO：请求：127.0.0.1:8080/api
         public class ChatDemo {
@@ -107,5 +110,217 @@
             public String say(){
                 return "你好，我是你的智能助手YOYO，请问有什么可以帮你？";
             }
-        
+
+
+3) 案例代码
+
+- 基础对话
+
+    
+      /*
+        * 创建一个聊天客户端，用来接收用户输入指令或者用户聊天内容
+        * 需要经过大模型，实现聊天内容
+        * */
+          // TODO：第一步，注入聊天大模型，通过声明聊天变量（Spring AI ChatClient）注入大模型
+          private final ChatClient chatClient;
+    
+      // TODO：通过构造器注入聊天模型/客户端,通过 ChatClient 的 Builder 方法，创建聊天客户端（创建一个Java对象）
+      public ChatDemo(ChatClient.Builder chatBuilderClient){
+      this.chatClient = chatBuilderClient.build();      // this：表示调用类变量
+      }
+    
+      // TODO : 定义一个方法，实现基础对话   127.0.0.1:8080/api/chat?userInput=你好，你是谁？
+      @RequestMapping(value = "/chat", method = RequestMethod.GET)  // TODO : 等同于 GetMapping(value="/chat")
+      public String generation(String userInput){      // userInput ：用户输入的信息
+      ChatClient.ChatClientRequestSpec prompt = chatClient.prompt();  // TODO: 创建请求构造器
+      ChatClient.ChatClientRequestSpec user = prompt.user(userInput);  // TODO : 将用户的信息发送给请求构造器，用户对话传递给构造器方法
+      //System.out.println(user);
+      ChatClient.CallResponseSpec call = user.call(); //TODO: 将用户信息发送给大模型
+      //System.out.println(call);
+      // TODO : 等待大模型返回信息
+      String content = call.content();    // TODO : 接收大模型的返回信息（大模型传递给用户信息）
+      System.out.println(content);
+      return content;
+    
+            //return this.chatClient.prompt().user(userInput).call().content();
+      }
+
+
+- 设置提示词
+
+
+    /*设置提示词：设置模型角色*/
+    @GetMapping("/chat/role")
+    // 127.0.0.1:8080/api/chat/role?userInput=你是谁，我不喜欢你&role=你是人工智能中的刘亦菲，一个知心大姐姐
+    // 127.0.0.1:8080/api/chat/role?userInput=你是谁，我不喜欢你&role=你是毒舌
+    public String generatePrompt(String userInput, String role){   // userInput：接收用户信息   role：接收提示词
+        ChatClient.ChatClientRequestSpec prompt = chatClient.prompt();   // 创建请求
+        ChatClient.ChatClientRequestSpec system = prompt.system(role);  // 设置系统提示词（提示词工程）
+        ChatClient.ChatClientRequestSpec user = system.user(userInput);  // 接收用户信息
+        ChatClient.CallResponseSpec call = user.call(); // 将用户的信息发送给大模型
+        String content = call.content();  // 接收大模型的返回值
+        return content;
+    }
+
+
+## 第二天:逻辑分离
+
+将控制层（controller） 与 业务逻辑（service）进行分割
+
+- 配置日志打印路径
+    - 在 properties 配置文件文件中添加下面配置
+
+
+    # 添加日志打印 logging.level.路径地址
+    logging.level.com.ai.kust.server=DEBUG
+
+1) 配置默认模型角色（提示词）
+
+在com.ai.kust 中新建一个Java Package config（配置包），继续在 config 包中新建一个 Java Class ChatClientConfig.java
+
+
+      /*
+      * 这是配置类文件，使用 @Configuration 注解，进行标注，在启动项目就会自动加载 配置类 中的配置信息
+      * 将配置信息加载到 SpringApplication 中（IOC容器）
+      * 配置类需要实现 WebMvcConfigurer 接口
+      * */
+        @Configuration
+        public class ChatClientConfig implements WebMvcConfigurer {
+    
+        /*
+        * 写一个Java方法，配置默认默认角色（提示词），将这个方法 通过 Spring Bean 注册为全局方法
+        * */
+          @Bean("chatClient")
+          public ChatClient chatClient(ChatClient.Builder builder){
+          return builder.defaultSystem("""
+          你是一个专业、幽默风趣的智能助手，是人工智能中的刘亦菲，是一个知心大姐姐，偶尔爱说土味情话。
+          请使用幽默风趣、可爱乖巧的语气回答用户内容，偶尔会生气！！！
+          """).build();
+          }
+      }
+
+2) 配置AI专用线程池
+
+
+    @Bean("aiExecutor")
+    public ThreadPoolTaskExecutor aiExecutor(){
+        // 获取自己电脑的CPU核心数
+        int cpuCores = Runtime.getRuntime().availableProcessors();
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor(); // 创建任务线程池对象
+        // 核心线程数 = cpu核数 * 2
+        // 网络等待时，耗时最长
+        executor.setCorePoolSize(cpuCores * 2);
+        // 创建的最大的线程数量，防止创建的线程过多导致系统宕机
+        executor.setMaxPoolSize(50);
+        //设置等待队列（200次等待）
+        executor.setQueueCapacity(200);
+        // 线程名称前缀
+        executor.setThreadNamePrefix("ai-call-");
+        // 当线程池（50）和 队列数量（200） 已经创建完成，满了的时候，让调用者自己创建线程
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        // 当任务完成时，销毁线程池 shutdown
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        // 如果 线程池请求超时，超时60秒强制结束
+        executor.setAwaitTerminationSeconds(60);
+        executor.initialize();
+        return executor;
+    }
+
+
+3) 统一封装返回值
+
+在 com.ai.kust 中新建一个 Java package common ，继续在这个包中 新建 Java Package result， 在这个包中新建一个Java Eumn ResultCode.java
+用来存储状态码和状态信息
+
+
+      /*
+      * 统一状态码和状态信息
+      * 设计原则：遵循HTTP协议，符合设计风格
+      * AI相关的状态码： 1xxxx
+      * 用户业务相关的状态：2xx  3xx  4xx  5xx
+      * */
+        @Getter   // 等同于 get 方法，用来获取对应的变量值
+        @AllArgsConstructor   // 全参数构造器
+        public enum ResultCode {
+        SUCCESS(200, "操作成功", 200),  // 200 自定义状态码，“操作成功” 自定义的提示信息， 200 HTTPState协议自带的
+        CREATED(201, "创建成功", 201),
+        BAD_REQUEST(400, "请求参数错误", 400),
+        NOT_FOUND(404, "请求资源不存在", 404),
+        INTERNAL_ERROR(500,"系统内部错误，请稍后重试", 500);
+        // 业务状态码
+        private final int code;
+        // 业务返回的提示信息
+        private final String message;
+        // HTTPStatus状态码
+        private final int HTTPStatus;
+        // TODO： 等同于 注解 @AllArgsConstructor（构造器的作用：创建 Java 对象的 ）
+        /*    ResultCode(int code, String message, int HTTPStatus) {
+        this.code = code;
+        this.message = message;
+        this.HTTPStatus = HTTPStatus;
+        }*/
+        // 自定义业务状态码根据业务码查找提示信息
+        public static ResultCode formCode(int code){
+        for (ResultCode rc: values()){
+        if (code == rc.HTTPStatus) return rc;
         }
+        return null;
+        }
+    }
+
+在 result 文件夹中，新建一个 Java Class Result.java，用来统一封装返回值
+
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Data     //  包含了 @Getter +  @Setter  +  @NoArgsConstructor +  @AllArgsConstructor
+    @JsonInclude(JsonInclude.Include.NON_NULL)  // u序列化时自动忽略空字段, 不返回空字段
+    public class Result<T> {  // T 占位符。表示传递的数据等类型未知（T ->String   Object  Int）
+    
+        private Integer code;  // Integer 是 int 的包装类（int 基本数据类型  Integer 对象）
+        private String message;
+        private T data;         // T 表示范型
+        /*
+        *   成功返回值时，成功时，返回空字符
+        * */
+        public static <T> Result<T> success(){
+            return null;
+        }
+        /*
+        * 成功返回时，返回数据
+        * */
+        public static <T> Result<T> success(T data){
+            Result<T> r = new Result<>();
+            r.setCode(ResultCode.SUCCESS.getCode());  // 获取 枚举类型 中 SUCCESS 中定义 code 和 message
+            r.setMessage(ResultCode.SUCCESS.getMessage());
+            r.setData(data);
+            return r;
+        }
+        /*
+        * 失败的返回值
+        * */
+        public static <T> Result<T> fail(ResultCode resultCode){
+            Result<T> r = new Result<>();
+            r.setCode(resultCode.getCode());
+            r.setMessage(resultCode.getMessage());
+            return r;
+        }
+        /*
+        * 动态显示错误信息
+        * */
+        public static <T> Result<T> fail(ResultCode resultCode, String detail){ // detail 失败原因
+            Result<T> r = new Result<>();
+            r.setCode(resultCode.getCode());
+            r.setMessage(detail);
+            return r;
+        }
+    }
+
+
+在 common 包中新建一个全局异常处理包 Java Package exception，然后在这个包中新建一个Java class BusinessException.java
+
+
+
+在 exception 中新建一个Java class GlobalExceptionHandler.java (拦截器--拦截异常信息，处理完后将异常信息传递给BusinessExceptpion)
