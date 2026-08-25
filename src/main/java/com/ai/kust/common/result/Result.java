@@ -13,13 +13,29 @@ public class Result<T> {
     public static <T> Result<T> success() {
         return null;
     }
-    
+
     //成功时返回数据
     public static <T> Result<T> success(T data) {
         Result<T>  r = new Result<>();
         r.setCode(ResultCode.SUCCESS.getCode());
         r.setMessage(ResultCode.SUCCESS.getMessage());
         r.setData(data);
+        return r;
+    }
+
+    //返回失败的返回值
+    public static <T> Result<T> fail(ResultCode resultCode) {
+        Result<T>  r = new Result<>();
+        r.setCode(resultCode.getCode());
+        r.setMessage(resultCode.getMessage());
+        return r;
+    }
+
+    //动态显示错误信息
+    public static <T> Result<T> fail(ResultCode resultCode, String detail) {
+        Result<T>  r = new Result<>();
+        r.setCode(resultCode.getCode());
+        r.setMessage(detail);
         return r;
     }
 
