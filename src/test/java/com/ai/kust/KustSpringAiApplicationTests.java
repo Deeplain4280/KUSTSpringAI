@@ -8,6 +8,8 @@ class KustSpringAiApplicationTests {
 
     @Test
     void contextLoads() {
+        System.out.println(ResultCode.formCode(404));
+        System.out.println(ResultCode.formCode(404).getMessage());
     }
 
 }
