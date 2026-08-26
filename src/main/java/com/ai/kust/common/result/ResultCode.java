@@ -12,8 +12,9 @@ public enum ResultCode {
     BAD_REQUEST(400, "请求参数错误",  400),
     NOT_FOUND(404, "请求资源不存在", 404),
     METHOD_NOT_ALLOWED(405, "方法不允许",405),
-    INTERNAL_ERROR(500, "内部系统错误", 500);
+    INTERNAL_ERROR(500, "内部系统错误", 500),
 
+    AI_CALL_FAILED(1001, "AI服务器繁忙，请稍后重试", 502);
 
     private final int code;
     private final  String message;

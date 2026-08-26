@@ -91,4 +91,14 @@ public class GlobalExceptionHandler {
                 .body(Result.fail(ResultCode.NOT_FOUND));
     }
 
+    /*
+     * 兜底异常
+     * */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Result<Void>> handleUnexcepted(Exception e, HttpServletRequest request){
+        log.error("[{}] 系统未预期异常：{}", request.getRequestURI(), e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Result.fail(ResultCode.INTERNAL_ERROR));
+    }
+
 }
