@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -25,5 +26,15 @@ public class ChatController {
     public Result<String>chat(String userInput, String role) {
         String content = chatService.chat(userInput, role);
         return Result.success(content);
+    }
+
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> chatStream(String userInput) {
+        return chatService.chatStream(userInput);
+    }
+
+    @GetMapping(value = "/stream/role", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String>chatStream(String userInput, String role) {
+        return chatService.chatStream(userInput, role);
     }
 }

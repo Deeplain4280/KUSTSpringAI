@@ -8,6 +8,9 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -53,7 +56,7 @@ public class ChatServiceImpl implements ChatService {
             String content =CompletableFuture.supplyAsync(()->{
                 ChatClient.ChatClientRequestSpec promptSpec = chatClient.prompt();
                 if(StringUtils.hasText(role)) {
-                    promptSpec = promptSpec.system(role)
+                    promptSpec = promptSpec.system(role);
                 }
                 return promptSpec.user(userInput).
                         call().
@@ -67,4 +70,29 @@ public class ChatServiceImpl implements ChatService {
             throw new BusinessException(ResultCode.AI_CALL_FAILED, e);
         }
     }
+
+    public Flux<String> chatStream(String userInput) {
+        log.debug("AI问答已受理：{}", userInput);
+        return chatClient.prompt().
+                user(userInput).
+                stream().
+                content().
+                subscribeOn(Schedulers.fromExecutor(aiExecutor)).
+                doOnError(e -> log.error("AI流式对话失败：{}", userInput, e)).
+                onErrorMap(e -> new BusinessException(ResultCode.AI_CALL_FAILED));
+    }
+    
+    public Flux<String> chatStream(String userInput, String role) {
+        log.debug("AI对话已受理：{}, 设置模型角色：{}", userInput, role);
+        return chatClient.prompt()
+                .system(role)
+                .user(userInput)
+                .stream()
+                .content()
+                .subscribeOn(Schedulers.fromExecutor(aiExecutor))
+                .doOnError(e -> log.error("AI流式对话失败：{}", userInput, e))
+                .onErrorMap(e -> new BusinessException(ResultCode.AI_CALL_FAILED));
+    }
+
+
 }
