@@ -21,4 +21,9 @@ public class ChatController {
         String content = chatService.chat(userInput);
         return Result.success(content);
     }
+    @GetMapping(value = "/chat/role", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Result<String>chat(String userInput, String role) {
+        String content = chatService.chat(userInput, role);
+        return Result.success(content);
+    }
 }

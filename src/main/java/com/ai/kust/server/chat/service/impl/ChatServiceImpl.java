@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -29,6 +30,36 @@ public class ChatServiceImpl implements ChatService {
             String content = CompletableFuture.supplyAsync(()->
                     chatClient.prompt().user(userInput).call().content(), aiExecutor
                     ).join();
+            log.debug("AI响应对话内容：{}", content);
+            return content;
+        }catch (Exception e) {
+            log.error("ai对话异常，用户输入：{}", userInput,e);
+            throw new BusinessException(ResultCode.AI_CALL_FAILED, e);
+        }
+    }
+
+    public String chat(String userInput, String role) {
+        try {
+            log.debug("AI对话内容：{}, 设置模型角色：{}", userInput, role);
+            /*String content = CompletableFuture.supplyAsync(()->
+                chatClient.
+                prompt().
+                system(role).
+                user(userInput).
+                call().
+                content(), aiExecutor
+            ).join();*/
+
+            String content =CompletableFuture.supplyAsync(()->{
+                ChatClient.ChatClientRequestSpec promptSpec = chatClient.prompt();
+                if(StringUtils.hasText(role)) {
+                    promptSpec = promptSpec.system(role)
+                }
+                return promptSpec.user(userInput).
+                        call().
+                        content();
+            },aiExecutor).join();
+
             log.debug("AI响应对话内容：{}", content);
             return content;
         }catch (Exception e) {
