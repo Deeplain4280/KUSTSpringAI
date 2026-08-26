@@ -11,6 +11,7 @@ public enum ResultCode {
     CREATED(201, "创建成功", 201),
     BAD_REQUEST(400, "请求参数错误",  400),
     NOT_FOUND(404, "请求资源不存在", 404),
+    METHOD_NOT_ALLOWED(405, "方法不允许",405),
     INTERNAL_ERROR(500, "内部系统错误", 500);
 
 
