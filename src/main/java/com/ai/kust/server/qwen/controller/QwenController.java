@@ -12,7 +12,7 @@ import reactor.core.publisher.Flux;
 @RestController
 @RequestMapping("/api/qwen")
 @RequiredArgsConstructor//等同于@Resours
-public class QuwenControllor {
+public class QwenController {
 
     private final QwenService QwenService;
 

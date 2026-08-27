@@ -322,5 +322,127 @@
 在 common 包中新建一个全局异常处理包 Java Package exception，然后在这个包中新建一个Java class BusinessException.java
 
 
-
 在 exception 中新建一个Java class GlobalExceptionHandler.java (拦截器--拦截异常信息，处理完后将异常信息传递给BusinessExceptpion)
+
+
+## 第三天：代码分离
+
+- 将控制层和服务层进行代码抽离，控制器用来控制数据流向，服务层用来写代码业务逻辑！
+
+1. 服务层
+- 在 chat 中 新建一个 服务层 java package servcie，继续在 service 包中新建Java interface ChatService.java
+
+
+
+- 在 service 包中，新建一个 Java package impl，实现接口中的抽象方法，在 impl 包中，新建 Java Class ChatServiceImpl.java
+这个Java类，用来实现接口中的方法.
+
+
+- 在controller包中 新建一个 Java Class ChatController.java 用来做数据转发
+
+
+2.流式输出配置自己的，需要配置独立的异步请求线程池
+
+- 在 ChatClientConfig.java 中配置独立线程池
+
+
+    /*
+    * 配置Spring MVC支持异步请求
+    * 需要配置独立的SSE（Servet-Sent-Events）
+    * */
+    @Override
+    public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+        // 指定MVC线程池
+        configurer.setTaskExecutor(aiExecutor());
+        // 配置超市时间，避免僵尸一直占用线程池，配置60秒，避免线程一直占用资源
+        configurer.setDefaultTimeout(60000L);
+    }
+
+
+## 第四天：记忆功能
+
+- 大模型（LLM-大语言模型）是一个无状态（一次对话一个线程，无法识别上下文的对话内容）的问答系统
+  - redis记忆功能，开源的redis不支持 LTE redis-stack （使用 docker 部署私有 redis（支持redis-stack版本），Linux 部署 redis-stack 版本） 
+  - 使用 JDBC 做记忆功能（使用MySQL作为记忆功能），redis做短期记忆（内存记忆），MySQL做长期记忆直到用户自己删除（redis+mysql）
+
+1. 使用MySQL做记忆功能
+
+- 在 pom.xml 文件中导入jdbc依赖和连接数据库的依赖
+
+        <!-- jdbc 记忆以来（MySQL记忆功能的依赖） -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-model-chat-memory-repository-jdbc</artifactId>
+        </dependency>
+        <!-- 连接MySQL数据库的依赖 -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+
+2. 配置数据库连接
+- 在properties配置数据库连接和记忆模型
+
+
+    # 数据库连接驱动
+    spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+    # 数据库连接地址和服务器地址
+    spring.datasource.url=jdbc:mysql://127.0.0.1:3306/kust_spring_ai?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    # 数据库用户名
+    spring.datasource.username=root
+    # 数据库密码
+    spring.datasource.password=minseung.yun
+    # 开启MySQL数据库记忆功能
+    spring.ai.chat.memory.repository.jdbc.initialize-schema=always
+    # 记忆功能日志打印
+    logging.level.org.springframework.ai.autoconfigure.chat.memory=DEBUG
+
+3. 配置文件中，配置记忆功能的上下文窗口
+
+- 在 config 文件夹中，新建一个配置类 Java class AIMemoryConfig.java
+
+4. 项目代码（chat中的代码，只是demo案例代码； common  config属于项目架构）
+
+- 在server Java包中新建一个 Java package qwen
+- 在 qwen 包中，新建一个 Java 包 service，新建一个 Java interface QwenService.java
+
+- 在service 这个包中，新建一个 Java package impl，然后在 impl 中新建一个Java class QwenServiceImpl.java 用来实现接口中的抽象方法
+
+- 在 qwen 中新建一个 Java package controller，然后在这个新建的包中新建一个 Java class QwenController.java
+
+4. 获取QQ邮箱授权码
+
+- 获取qq邮箱授权码
+- 添加 pom.xml 邮件发送的依赖
+
+
+        <!-- 邮箱发送依赖 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
+
+- 添加配置文件
+
+
+    # qq邮箱服务器地址
+    spring.mail.host=smtp.qq.com
+    # qq 邮箱的端口号
+    spring.mail.port=587
+    # 自己的QQ邮箱（需要改为自己的QQ邮箱）
+    spring.mail.username=jaeeun_humg@foxmail.com
+    # QQ 邮箱的授权码（刚刚让大家保存起来）
+    spring.mail.password=unhsyukzsjikbifi
+    # 允许使用密钥进行远程调用，需要进行身份验证（检测邮箱和密钥）
+    spring.mail.properties.mail.smtp.auth=true
+    # 允许远程调过程中使用加密传输
+    spring.mail.properties.mail.smtp.starttls.enable=true
+    # 与服务器邮箱连接超时时间（）
+    spring.mail.properties.mail.smtp.connectiontimeout=5000
+    # 服务器响应超市时间
+    spring.mail.properties.mail.smtp.timeout=5000
+    # 写入服务器超时时间
+    spring.mail.properties.mail.smtp.writetimeout=5000
