@@ -72,7 +72,7 @@ public class ChatServiceImpl implements ChatService {
     }
 
     public Flux<String> chatStream(String userInput) {
-        log.debug("AI问答已受理：{}", userInput);
+        log.info("AI问答已受理：{}", userInput);
         return chatClient.prompt().
                 user(userInput).
                 stream().
@@ -81,16 +81,16 @@ public class ChatServiceImpl implements ChatService {
                 doOnError(e -> log.error("AI流式对话失败：{}", userInput, e)).
                 onErrorMap(e -> new BusinessException(ResultCode.AI_CALL_FAILED));
     }
-    
+
     public Flux<String> chatStream(String userInput, String role) {
-        log.debug("AI对话已受理：{}, 设置模型角色：{}", userInput, role);
-        return chatClient.prompt()
-                .system(role)
-                .user(userInput)
-                .stream()
-                .content()
+        log.info("AI对话已受理：{}, 设置模型角色：{}", userInput, role);
+        ChatClient.ChatClientRequestSpec promptSpec = chatClient.prompt();
+        if (StringUtils.hasText(role)) {
+            promptSpec = promptSpec.system(role);
+        }
+        return promptSpec.user(userInput).stream().content()
                 .subscribeOn(Schedulers.fromExecutor(aiExecutor))
-                .doOnError(e -> log.error("AI流式对话失败：{}", userInput, e))
+                .doOnError(e -> log.error("AI流式对话失败：{}", "提示词：{}", userInput, role, e))
                 .onErrorMap(e -> new BusinessException(ResultCode.AI_CALL_FAILED));
     }
 
