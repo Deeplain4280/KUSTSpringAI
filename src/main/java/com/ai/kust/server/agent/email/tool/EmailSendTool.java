@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 public class EmailSendTool {
     private final JavaMailSender javaMailSender;
 
-    @Value(":${spring.mail.username}")
+    @Value("${spring.mail.username}")
     private String setFrom;
 
     @Tool(description = """
