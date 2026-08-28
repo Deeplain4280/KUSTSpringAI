@@ -1,4 +1,4 @@
-package com.ai.kust.server.email.tool;
+package com.ai.kust.server.agent.email.tool;
 
 
 import jakarta.mail.MessagingException;
