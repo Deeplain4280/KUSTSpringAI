@@ -38,7 +38,6 @@ public class EmailServiceImpl  implements EmailService {
     public EmailServiceImpl(ChatClient.Builder chatBuilder,
                             @Qualifier("aiExecutor") Executor aiExecutor,
                             ChatMemory chatMemory,
-                            RestClient.Builder builder,
                             EmailSendTool emailSendTool) {
         this.aiExecutor = aiExecutor;
         this.memoryAdvisor = MessageChatMemoryAdvisor.builder(chatMemory).build();
