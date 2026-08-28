@@ -4,6 +4,7 @@ import com.ai.kust.common.exception.BusinessException;
 import com.ai.kust.common.result.ResultCode;
 import com.ai.kust.server.agent.email.service.EmailService;
 import com.ai.kust.server.agent.email.tool.EmailSendTool;
+import com.ai.kust.server.agent.email.tool.SQLQueryTool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -25,6 +26,7 @@ public class EmailServiceImpl  implements EmailService {
     private final ChatClient emailChatClient;
     private final Executor aiExecutor;
     private final EmailSendTool emailSendTool;
+    private final SQLQueryTool sqlQueryTool;
     private MessageChatMemoryAdvisor memoryAdvisor;
 
     private final String SYSTEM_EMAIL_PROMPT = """
@@ -35,15 +37,25 @@ public class EmailServiceImpl  implements EmailService {
             4）如果用户提供的信息不完整（比如缺少收件人邮箱、收件人姓名等关键信息）时，主动追问用户，不要猜测
             """;
 
+    private String buildPrompt(String userInput) {
+        String prompt = """
+                
+                """.formatted(userInput);
+        return prompt;
+    }
+
     public EmailServiceImpl(ChatClient.Builder chatBuilder,
                             @Qualifier("aiExecutor") Executor aiExecutor,
                             ChatMemory chatMemory,
-                            EmailSendTool emailSendTool) {
+                            EmailSendTool emailSendTool,
+                            SQLQueryTool sqlQueryTool
+    ) {
         this.aiExecutor = aiExecutor;
         this.memoryAdvisor = MessageChatMemoryAdvisor.builder(chatMemory).build();
         this.emailSendTool = emailSendTool;
+        this.sqlQueryTool = sqlQueryTool;
         this.emailChatClient = chatBuilder.defaultSystem(SYSTEM_EMAIL_PROMPT)
-                .defaultTools(emailSendTool)
+                .defaultTools(emailSendTool, sqlQueryTool)
                 .build();
 
 
