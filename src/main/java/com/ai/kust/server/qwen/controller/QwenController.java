@@ -22,7 +22,8 @@ public class QwenController {
     }
 
     @GetMapping(value = "/stream/memory/role", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<String> stream(@RequestParam String userInput, @RequestParam String sessionId, String role) {
+    public Flux<String> stream(@RequestParam String userInput, @RequestParam String sessionId,
+                               @RequestParam(required = false) String role) {
         return QwenService.stream(userInput, sessionId, role);
     }
 }
