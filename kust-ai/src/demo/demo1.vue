@@ -2,12 +2,12 @@
 
 import vue from "@vitejs/plugin-vue";
 
-const username = "小花";
+let username = "小花";
 let age = 30;
 
 import { ref } from "vue";
 let count = ref(1);
-const refusername = ref("马立群")
+let refusername = ref("马立群")
 
 function addAge() {
   age = age + 1;
@@ -19,6 +19,7 @@ function addCount() {
   console.log("count变量的值正在发生变化", count.value);
 }
 
+let dict = ref({username:"马加爵", age:100, phone:123456789});
 </script>
 
 <template>
@@ -30,6 +31,12 @@ function addCount() {
   <p>==========v-on事件绑定=======</p>
   <button v-on:click="addAge()"></button>
   <button @click="addCount()"></button>
+  <p>=========输入框，通过v-model进行双向绑定=========</p>
+  <p>username变量： <input type="text" v-model = "username"></p>
+  <p>refusername变量：<input type="text" v-model ="refusername"></p>
+
+  dict的值：{{dict}}<br>
+  dict的值username:{{dict.username}}
 </template>
 
 <style scoped>
