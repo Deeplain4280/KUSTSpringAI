@@ -37,7 +37,7 @@ public class EmailServiceImpl  implements EmailService {
             4）如果用户提供的信息不完整（比如缺少收件人邮箱、收件人姓名等关键信息）时，主动追问用户，不要猜测
             """;
 
-    private String buildPrompt() {
+    private String buildPrompt(String userInput) {
         String prompt = """
                  你是一个活波、非常专业的邮件中撰写助手名和邮件发送助手，用户输入信息，提供了标识符: %s，这个标符可能是邮箱地址，也可能是姓名；
                  请严格按照如下的工作流程进行工作，工作流程如下：
@@ -52,7 +52,7 @@ public class EmailServiceImpl  implements EmailService {
                   2）获取到用户姓名之后，调用 queryUser 这个工具查询用户邮箱（email字段），分析查询结果，并获取到用户的邮箱地址
                   3）如果数据库返回数据为空列表，返回【数据库用户数据为空】，如果查询到用户数据但是邮箱为空，就返回【用户邮箱未注册】
                   4）获取到对应的邮箱地址后，执行第二步中的工作流程
-                """;
+                """.formatted(userInput);
         return prompt;
     }
 
@@ -113,9 +113,8 @@ public class EmailServiceImpl  implements EmailService {
         return Flux.defer(() -> {
             try {
                ChatResponse chatResponse = emailChatClient
-                       .prompt(buildPrompt())
-                       .user(userInput)
-                       .tools(emailSendTool, sqlQueryTool)
+                       .prompt()
+                       .user(buildPrompt(userInput))
                        .advisors(memoryAdvisor)
                        .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, sessionId))
                        .call()
