@@ -36,3 +36,12 @@ build/
 .vscode/
 
 logs/
+
+### 前端 kust-ai ###
+kust-ai/node_modules/
+kust-ai/dist/
+kust-ai/dist-ssr/
+kust-ai/coverage/
+kust-ai/*.local
+kust-ai/.eslintcache
+kust-ai/.vscode/*
