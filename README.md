@@ -446,3 +446,22 @@
     spring.mail.properties.mail.smtp.timeout=5000
     # 写入服务器超时时间
     spring.mail.properties.mail.smtp.writetimeout=5000
+
+
+## 第五天：邮件发送
+
+- 记忆功能的流式输出，设计提示词（模型角色）
+
+1. 邮件发送智能体
+
+- 在 server 包中，新建一个 Java 包  agent
+- 然后在 agent 新建一个Java package email，然后在 email 这个包中，新建一个 工具包 tool 用来定义工具类，工具类供大模型进行调用，执行对应的自动化功能
+- 在 tool 这个包中，新建一个 Java class EmailSendTool.java
+
+- 在 email 中新建一个 service，然后在这个包中，新建一个Java interface EmailService.java
+
+- 在 service 中，新建一个 Java package impl ，然后在这个包中新建Java class EmailServiceImpl.java
+
+- 在 agent 中 新建一个Java package controller ，新建Java class EmailController.java
+
+- 在 tool 新建 Java Class SQLQueryTool.java 

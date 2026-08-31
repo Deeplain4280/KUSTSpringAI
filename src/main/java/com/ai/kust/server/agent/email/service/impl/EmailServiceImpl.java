@@ -25,9 +25,9 @@ public class EmailServiceImpl  implements EmailService {
 
     private final ChatClient emailChatClient;
     private final Executor aiExecutor;
+    private MessageChatMemoryAdvisor memoryAdvisor;
     private final EmailSendTool emailSendTool;
     private final SQLQueryTool sqlQueryTool;
-    private MessageChatMemoryAdvisor memoryAdvisor;
 
     private final String SYSTEM_EMAIL_PROMPT = """
             你是一个专业的邮件发送和撰写助手，工作流程如下：
@@ -37,10 +37,22 @@ public class EmailServiceImpl  implements EmailService {
             4）如果用户提供的信息不完整（比如缺少收件人邮箱、收件人姓名等关键信息）时，主动追问用户，不要猜测
             """;
 
-    private String buildPrompt(String userInput) {
+    private String buildPrompt() {
         String prompt = """
-                
-                """.formatted(userInput);
+                 你是一个活波、非常专业的邮件中撰写助手名和邮件发送助手，用户输入信息，提供了标识符: %s，这个标符可能是邮箱地址，也可能是姓名；
+                 请严格按照如下的工作流程进行工作，工作流程如下：
+                  第一步：判断用户输入的标识符信息是标准的邮箱地址 还是 用户姓名
+                  第二步：如果是用户标准 邮箱地址，请按照如下流程工作：
+                  1)理解用户真实意图和想法，理解用户邮件需求后，帮住用户提取邮箱主题、撰写邮件内容正文；
+                  2)在撰写邮件内容的过程中，不调用邮件发送工具，撰写完成后将拟好的邮件内容以【邮件预览】的格式展示给用户；
+                  3）当用户明确回答【确认发送】、【发送】、【可以发送了】等指令的时候，才调用工具 sendEmail 进行发送；
+                  4）如果用户提供的信息不完整（比如缺少收件人邮箱、收件人姓名等关键信息）时，主动追问用户，不要猜测；
+                  第三步：如果用户输入的标识符信息，是用户姓名，那么请按照如下流程进行工作：
+                  1) 从标识符中提取用户输入的 用户姓名
+                  2）获取到用户姓名之后，调用 queryUser 这个工具查询用户邮箱（email字段），分析查询结果，并获取到用户的邮箱地址
+                  3）如果数据库返回数据为空列表，返回【数据库用户数据为空】，如果查询到用户数据但是邮箱为空，就返回【用户邮箱未注册】
+                  4）获取到对应的邮箱地址后，执行第二步中的工作流程
+                """;
         return prompt;
     }
 
@@ -100,8 +112,10 @@ public class EmailServiceImpl  implements EmailService {
     private Flux<String> callNoStream(String userInput, String sessionId) {
         return Flux.defer(() -> {
             try {
-               ChatResponse chatResponse = emailChatClient.prompt()
+               ChatResponse chatResponse = emailChatClient
+                       .prompt(buildPrompt())
                        .user(userInput)
+                       .tools(emailSendTool, sqlQueryTool)
                        .advisors(memoryAdvisor)
                        .advisors(spec -> spec.param(ChatMemory.CONVERSATION_ID, sessionId))
                        .call()
