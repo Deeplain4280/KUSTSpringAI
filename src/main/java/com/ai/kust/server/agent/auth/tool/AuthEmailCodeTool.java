@@ -74,19 +74,21 @@ public class AuthEmailCodeTool {
                 "expireMinutes", expire
         );
     }
-    private String buildEmailHtml(String code) {
-        String text = String.format("""
+
+    // 定义一个私有方法，用来初始化邮箱验证码界面
+    private String buildEmailHtml(String code){
+        String text =  String.format("""
                 <div style="margin:0;padding:0;background-color:#f4f6f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
-                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f6f9;padding:40px 20px;">
+                  <table role="presentation" width="100%%" cellpadding="0" cellspacing="0" style="background-color:#f4f6f9;padding:40px 20px;">
                     <tr>
                       <td align="center">
                         <!-- 主卡片 -->
-                        <table role="presentation" cellpadding="0" cellspacing="0" style="max-width:420px;width:100%;background:#ffffff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.06);overflow:hidden;">
+                        <table role="presentation" cellpadding="0" cellspacing="0" style="max-width:420px;width:100%%;background:#ffffff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.06);overflow:hidden;">
                 
                           <!-- 顶部图标区 -->
                           <tr>
                             <td align="center" style="padding:36px 32px 0;">
-                              <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#4F8EF7,#6C5CE7);display:flex;align-items:center;justify-content:center;margin:0 auto;">
+                              <div style="width:56px;height:56px;border-radius:50%%;background:linear-gradient(135deg,#4F8EF7,#6C5CE7);display:flex;align-items:center;justify-content:center;margin:0 auto;">
                                 <span style="font-size:26px;line-height:56px;color:#fff;">🔐</span>
                               </div>
                             </td>
@@ -118,11 +120,11 @@ public class AuthEmailCodeTool {
                               </p>
                             </td>
                           </tr>
-                
+               
                           <!-- 底部分隔线 + 品牌区（可选） -->
                           <tr>
                             <td style="border-top:1px solid #f0f0f0;padding:20px 32px;text-align:center;">
-                              <p style="margin:0;font-size:11px;color:#c0c0c0;">© Your App Name · Security Verification</p>
+                              <p style="margin:0;font-size:11px;color:#c0c0c0;">© 智能应用系统 · Security Verification</p>
                             </td>
                           </tr>
                 
@@ -134,5 +136,5 @@ public class AuthEmailCodeTool {
                 """, code, expire);
         return text;
     }
-
 }
+

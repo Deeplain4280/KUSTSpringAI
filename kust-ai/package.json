@@ -17,6 +17,9 @@
   "dependencies": {
     "axios": "^1.20.0",
     "element-plus": "^2.14.5",
+    "highlight.js": "^11.12.0",
+    "katex": "^0.18.5",
+    "markdown-it": "^15.0.1",
     "pinia": "^4.0.2",
     "sass-embedded": "^1.103.1",
     "vue": "^3.5.40",

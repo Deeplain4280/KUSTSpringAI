@@ -2,7 +2,9 @@ package com.ai.kust.server.agent.controller;
 
 
 import com.ai.kust.common.result.Result;
+import com.ai.kust.common.result.ResultCode;
 import com.ai.kust.server.agent.auth.model.request.SendCodeRequest;
+import com.ai.kust.server.agent.auth.model.request.VerifyCodeRequest;
 import com.ai.kust.server.agent.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,8 +20,14 @@ public class AuthController {
 
     @PostMapping("/send-code")
     public Result<String> sendCode(@RequestBody SendCodeRequest request) {
-        String message = authService.sendCode(request.getIndentity());
+        String message = authService.sendCode(request.getIdentity());
         return Result.success(message);
 
+    }
+    //登录按钮
+    @PostMapping("/verify")
+    public Result<String> verifyCode(@RequestBody VerifyCodeRequest request) {
+        authService.verifyCode(request.getEmail(), request.getCode());
+        return Result.success(ResultCode.VERIFY_CODE_SUCCESS.getMessage());
     }
 }

@@ -1,5 +1,7 @@
 package com.ai.kust.server.agent.auth.service.impl;
 
+import com.ai.kust.common.exception.BusinessException;
+import com.ai.kust.common.result.ResultCode;
 import com.ai.kust.server.agent.auth.service.AuthService;
 import com.ai.kust.server.agent.auth.tool.AuthEmailCodeTool;
 import com.ai.kust.server.agent.auth.tool.EmailQueryTool;
@@ -7,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -34,7 +38,7 @@ public class AuthServiceImpl  implements AuthService {
                 
                 注意：回答简洁，不要出现任何工具名称，也不要输出任何技术细节
                 
-                """;
+                """.formatted(email);
     }
     public String sendCode(String email) {
         log.info("邮箱验证码已发送，邮箱为：{}", email);
@@ -45,5 +49,26 @@ public class AuthServiceImpl  implements AuthService {
                 .content();
         log.info("验证码发送成功，返回值为：{}", content);
         return content;
+    }
+
+    private final StringRedisTemplate redisTemplate;
+    @Value("${auth.code.key-prefix}")
+    private String keyPrefix;
+    public void verifyCode(String email, String code) {
+        String email1 = email.trim();
+        String code1 = code.trim();
+        String key = keyPrefix + email1;
+        String stored = redisTemplate.opsForValue().get(key);
+        if (stored == null) {
+            log.warn("验证码已过期或不存在:{}", code1);
+            throw new BusinessException(ResultCode.VERIFY_CODE_EXPIRED);
+        }
+        if (! stored.equals(code1)) {
+            log.warn("验证码输入错误，{}，请重新输入", code1);
+            throw new BusinessException(ResultCode.VERIFY_CODE_ERROR);
+        }
+        redisTemplate.delete(key);
+        log.warn("验证码已使用，删除redis中的验证码{}", code1);
+
     }
 }

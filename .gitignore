@@ -45,3 +45,5 @@ kust-ai/coverage/
 kust-ai/*.local
 kust-ai/.eslintcache
 kust-ai/.vscode/*
+
+.mimosa

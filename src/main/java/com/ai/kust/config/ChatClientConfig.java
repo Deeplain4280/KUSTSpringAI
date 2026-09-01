@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.concurrent.ThreadPoolExecutor;
@@ -54,5 +55,16 @@ public class ChatClientConfig implements WebMvcConfigurer {
     public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
         configurer.setTaskExecutor(aiExecutor());
         configurer.setDefaultTimeout(60000L);
+    }
+
+    //配置同源策略，cors不允许跨域
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")//允许所有端口号请求所有方法
+                .allowedOrigins("http://localhost:5173", "http://localhost:5174")
+                .allowedMethods("GET", "POST", "DELETE", "PUT", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(true)
+                .maxAge(3600);
+
     }
 }
