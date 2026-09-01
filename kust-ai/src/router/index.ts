@@ -7,6 +7,12 @@ const router = createRouter({
     name:"登录",
     component: () => import("@/views/Login.vue")
   },
+    {
+      path:"/index",
+      name:"主页",
+      component:() => import("@/components/Index.vue")
+    }
+
   ],
 })
 
