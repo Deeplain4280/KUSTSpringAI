@@ -53,7 +53,7 @@ public class AuthEmailCodeTool {
             helper.setFrom(setFrom);
             helper.setTo(email);
             helper.setSubject("登陆验证 邮箱验证码");
-            String text = bulidEmailHtml(code);
+            String text = buildEmailHtml(code);
             helper.setText(text, true);
             mailSender.send(message);
             log.info("邮件登录验证码发送成功，邮箱地址:{}", email);
@@ -71,10 +71,10 @@ public class AuthEmailCodeTool {
         return Map.of(
                 "success", true,
                 "message", "验证码已发送到"+email+","+expire+"分钟内有效",
-                "expireMintues", expire
+                "expireMinutes", expire
         );
     }
-    private String bulidEmailHtml(String code) {
+    private String buildEmailHtml(String code) {
         String text = String.format("""
                 <div style="margin:0;padding:0;background-color:#f4f6f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
                   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f6f9;padding:40px 20px;">
