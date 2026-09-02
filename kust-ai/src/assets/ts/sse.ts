@@ -46,7 +46,7 @@ export function streamChat(options: StreamChatOptions): void {
     userInput: question,
     sessionId: sessionId || '',
   })
-  const fullUrl = `${url || '/api/chat/stream/memory'}?${params.toString()}`
+  const fullUrl = `${url || '/api/qwen/stream/memory'}?${params.toString()}`
 
   typingRef.value = true
 
@@ -123,7 +123,7 @@ export function streamEmailChat(options: EmailStreamOptions): void {
     userInput: question,
     sessionId: sessionId || 'default',
   })
-  const fullUrl = `/api/email-agent/send?${params.toString()}`
+  const fullUrl = `/api/email/send?${params.toString()}`
 
   typingRef.value = true
 

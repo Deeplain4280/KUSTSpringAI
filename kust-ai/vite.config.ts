@@ -17,4 +17,21 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8080',
+        changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('proxyRes', (proxyRes) => {
+            proxyRes.headers['cache-control'] = 'no-cache'
+            proxyRes.headers['x-accel-buffering'] = 'no'
+            // @ts-ignore
+            proxyRes.socket?.setNoDelay(true)
+          })
+        },
+      },
+    },
+  },
 })
