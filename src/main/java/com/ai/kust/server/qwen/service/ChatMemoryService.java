@@ -1,6 +1,12 @@
 package com.ai.kust.server.qwen.service;
 
+import com.ai.kust.server.qwen.models.entity.ChatConversation;
+
+import java.util.List;
+
 public interface ChatMemoryService {
 
     void createConversation(String id, String email, String title);
+    /** 侧边栏对话列表 */
+    List<ChatConversation> listConversation(String userEmail);
 }
