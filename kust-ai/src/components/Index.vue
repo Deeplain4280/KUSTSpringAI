@@ -5,7 +5,7 @@
 
       <!-- 顶部 Logo 栏 -->
       <div class="sidebar-top-bar">
-        <span class="logo-text" v-show="isSidebarOpen">刘亦菲姐姐</span>
+        <span class="logo-text" v-show="isSidebarOpen">Zcode</span>
         <div class="top-actions">
           <button class="icon-btn" title="搜索" @click="openSearch">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -78,9 +78,19 @@
       <!-- 底部用户区 -->
       <div class="sidebar-footer" v-if="isSidebarOpen" v-click-outside="() => userMenuOpen = false">
         <div class="dropdown-menu user-menu" v-if="userMenuOpen">
-          <button class="dropdown-item" @click="openSettings">⚙️ 设置</button>
-          <button class="dropdown-item" @click="settings.darkMode = !settings.darkMode">{{ settings.darkMode ? '☀️ 浅色模式' : '🌙 深色模式' }}</button>
-          <button class="dropdown-item danger" @click="logout">🚪 退出登录</button>
+          <button class="dropdown-item" @click="openSettings">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span>设置</span>
+          </button>
+          <button class="dropdown-item" @click="settings.darkMode = !settings.darkMode">
+            <svg v-if="settings.darkMode" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg v-else width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <span>{{ settings.darkMode ? '浅色模式' : '深色模式' }}</span>
+          </button>
+          <button class="dropdown-item danger" @click="logout">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span>退出登录</span>
+          </button>
         </div>
         <button class="user-profile" @click="userMenuOpen = !userMenuOpen">
           <div class="avatar"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" /></div>
@@ -97,7 +107,10 @@
           <span class="chat-title-text">{{ activeConversation.title }}</span>
           <span class="mode-badge">{{ currentMode }}</span>
           <!-- ✅ 邮件模式标识 -->
-          <span v-if="agentMode === 'email'" class="mode-badge email-badge">📧 邮件助手</span>
+          <span v-if="agentMode === 'email'" class="mode-badge email-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,6 12,13 2,6"/></svg>
+            <span>邮件助手</span>
+          </span>
         </div>
         <button class="icon-btn" title="删除该对话" @click="deleteConversation(activeConversation.id)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -108,8 +121,8 @@
       <div class="messages-scroll" v-if="activeConversation" ref="messagesRef">
         <div v-for="(m, i) in activeConversation.messages" :key="i" class="message-row" :class="m.role">
           <div class="msg-avatar ai-avatar" v-if="m.role === 'ai'">
-            <svg v-if="agentMode === 'email'" width="20" height="20" viewBox="0 0 24 24" fill="#8b5cf6"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6" fill="none" stroke="white" stroke-width="2"/></svg>
-            <svg v-else width="20" height="20" viewBox="0 0 100 100" fill="#6366f1"><path d="M50 5 L93 27.5 V72.5 L50 95 L7 72.5 V27.5 Z"/><circle cx="50" cy="50" r="14" fill="white"/></svg>
+            <svg v-if="agentMode === 'email'" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6" fill="none" stroke="white" stroke-width="2"/></svg>
+            <svg v-else width="20" height="20" viewBox="0 0 100 100" fill="currentColor"><path d="M50 5 L93 27.5 V72.5 L50 95 L7 72.5 V27.5 Z"/><circle cx="50" cy="50" r="14" fill="white"/></svg>
           </div>
 
           <div v-if="m.role === 'ai'" class="bubble ai markdown-body" v-html="toHtml(m.content, isTyping)"></div>
@@ -125,7 +138,7 @@
         <!-- 思考中动画 -->
         <div class="message-row ai" v-if="isTyping && lastIsUser">
           <div class="msg-avatar ai-avatar">
-            <svg width="20" height="20" viewBox="0 0 100 100" fill="#6366f1"><path d="M50 5 L93 27.5 V72.5 L50 95 L7 72.5 V27.5 Z"/><circle cx="50" cy="50" r="14" fill="white"/></svg>
+            <svg width="20" height="20" viewBox="0 0 100 100" fill="currentColor"><path d="M50 5 L93 27.5 V72.5 L50 95 L7 72.5 V27.5 Z"/><circle cx="50" cy="50" r="14" fill="white"/></svg>
           </div>
           <div class="bubble ai thinking"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
         </div>
@@ -144,21 +157,21 @@
         <div class="welcome-section">
           <div class="logo-icon">
             <!-- ✅ 邮件模式图标 -->
-            <svg v-if="agentMode === 'email'" width="48" height="48" viewBox="0 0 24 24" fill="#8b5cf6">
+            <svg v-if="agentMode === 'email'" width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
               <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
               <polyline points="22,6 12,13 2,6" fill="none" stroke="white" stroke-width="2"/>
             </svg>
             <!-- 普通模式图标 -->
-            <svg v-else width="48" height="48" viewBox="0 0 100 100" fill="#6366f1">
+            <svg v-else width="48" height="48" viewBox="0 0 100 100" fill="currentColor">
               <path d="M50 5 L93 27.5 V72.5 L50 95 L7 72.5 V27.5 Z" opacity="0.9"/>
               <circle cx="50" cy="50" r="12" fill="white"/>
             </svg>
           </div>
           <h1 class="welcome-text">
-            {{ agentMode === 'email' ? '你好，我是你的邮件助手' : '你好，我是你的亦菲姐姐' }}
+            {{ agentMode === 'email' ? '你好，我们今天发送什么' : '你好，我们今天构建什么？' }}
           </h1>
           <p v-if="agentMode === 'email'" class="welcome-sub">
-            告诉我你想发什么邮件，我来帮你起草、修改和发送 ✉️
+            告诉我你想发什么邮件，我来帮你起草、修改和发送
           </p>
         </div>
       </div>
@@ -191,7 +204,7 @@
                 <div class="dropdown-menu up" v-if="modeMenuOpen">
                   <button class="dropdown-item" v-for="m in modes" :key="m" @click="selectMode(m)">
                     <span>{{ m }}</span>
-                    <svg v-if="m === currentMode" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    <svg v-if="m === currentMode" class="check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
                   </button>
                 </div>
               </div>
@@ -286,7 +299,7 @@
         <div class="temp-messages" ref="tempMessagesRef">
           <div v-for="(m, i) in tempMessages" :key="i" class="message-row" :class="m.role">
             <div class="msg-avatar ai-avatar" v-if="m.role === 'ai'">
-              <svg width="18" height="18" viewBox="0 0 100 100" fill="#6366f1"><path d="M50 5 L93 27.5 V72.5 L50 95 L7 72.5 V27.5 Z"/><circle cx="50" cy="50" r="14" fill="white"/></svg>
+              <svg width="18" height="18" viewBox="0 0 100 100" fill="currentColor"><path d="M50 5 L93 27.5 V72.5 L50 95 L7 72.5 V27.5 Z"/><circle cx="50" cy="50" r="14" fill="white"/></svg>
             </div>
             <div v-if="m.role === 'ai'" class="bubble ai markdown-body" v-html="toHtml(m.content, tempTyping)"></div>
             <div v-else class="bubble user">{{ m.content }}</div>
@@ -296,7 +309,7 @@
           </div>
           <div class="message-row ai" v-if="tempTyping && tempLastIsUser">
             <div class="msg-avatar ai-avatar">
-              <svg width="18" height="18" viewBox="0 0 100 100" fill="#6366f1"><path d="M50 5 L93 27.5 V72.5 L50 95 L7 72.5 V27.5 Z"/><circle cx="50" cy="50" r="14" fill="white"/></svg>
+              <svg width="18" height="18" viewBox="0 0 100 100" fill="currentColor"><path d="M50 5 L93 27.5 V72.5 L50 95 L7 72.5 V27.5 Z"/><circle cx="50" cy="50" r="14" fill="white"/></svg>
             </div>
             <div class="bubble ai thinking"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
           </div>
@@ -321,15 +334,24 @@
           </button>
         </div>
         <div class="setting-row">
-          <span>🌙 深色模式</span>
+          <span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            深色模式
+          </span>
           <button class="toggle" :class="{ on: settings.darkMode }" @click="settings.darkMode = !settings.darkMode"><span class="knob"></span></button>
         </div>
         <div class="setting-row">
-          <span>⏎ 回车发送消息</span>
+          <span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 10 4 15 9 20"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/></svg>
+            回车发送消息
+          </span>
           <button class="toggle" :class="{ on: settings.enterToSend }" @click="settings.enterToSend = !settings.enterToSend"><span class="knob"></span></button>
         </div>
         <div class="setting-row">
-          <span>🗑 清空所有对话</span>
+          <span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            清空所有对话
+          </span>
           <button class="danger-btn" @click="clearAll">清空</button>
         </div>
         <div class="settings-about">YIFEI Chat · v1.0.0</div>
@@ -369,7 +391,7 @@ const isSidebarOpen = ref(true)
 const isTyping = ref(false)
 const userEmail = ref('')
 
-const settings = reactive({ darkMode: false, enterToSend: true })
+const settings = reactive({ darkMode: true, enterToSend: true })
 const settingsOpen = ref(false)
 const userMenuOpen = ref(false)
 const openSettings = () => { settingsOpen.value = true; userMenuOpen.value = false }
@@ -395,7 +417,7 @@ const switchAgentMode = (mode) => {
   } else {
     agentMode.value = mode
     if (mode === 'email') {
-      showToast('📧 已切换到邮件助手模式')
+      showToast('已切换到邮件助手模式')
       if (!activeConversation.value) {
         newChat()
       }
@@ -416,7 +438,7 @@ const modeMenuOpen = ref(false)
 const moreMenuOpen = ref(false)
 const currentMode = ref('快速')
 const modes = ['快速', '深度思考', '联网搜索']
-const moreTools = ['🌐 翻译', '✍️ 写作', '💻 代码', '🎨 图像生成']
+const moreTools = ['翻译', '写作', '代码', '图像生成']
 const selectMode = (m) => { currentMode.value = m; modeMenuOpen.value = false; showToast(`已切换到「${m}」模式`) }
 const pickMoreTool = (t) => { moreMenuOpen.value = false; showToast(`「${t}」功能模拟中`) }
 

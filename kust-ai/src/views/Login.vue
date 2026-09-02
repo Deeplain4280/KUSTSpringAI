@@ -1,7 +1,10 @@
 <template>
   <div class="login-container">
     <div class="glass-panel">
-      <h3 class="title">🔐 邮箱登录</h3>
+      <h3 class="title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span>邮箱登录</span>
+      </h3>
 
       <el-form :model="account" :rules="rules" ref="formRef" class="login-form">
         <el-form-item label="邮箱" prop="email">
@@ -187,6 +190,9 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
+/* ============ Retro-Futurism · 登录终端 ============ */
+$font-mono: 'JetBrains Mono', 'Share Tech Mono', ui-monospace, SFMono-Regular, Menlo, Consolas,
+  'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', sans-serif;
 
 .login-container {
   min-height: 100vh;
@@ -194,46 +200,103 @@ onUnmounted(() => {
   justify-content: center;
   align-items: center;
   padding: 20px;
-
-  /* 背景图片设置 */
-  background-image: url('../assets/1.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-
-  /* 暗色遮罩层，让文字更清晰 */
   position: relative;
+  overflow: hidden;
+
+  /* 背景：深空渐变 + 复古太阳辉光 */
+  background:
+    radial-gradient(1400px 560px at 50% 122%, rgba(255, 45, 146, 0.28) 0%, rgba(255, 45, 146, 0.09) 40%, transparent 62%),
+    radial-gradient(1000px 440px at 50% 124%, rgba(255, 200, 60, 0.18) 0%, transparent 55%),
+    linear-gradient(180deg, #05060f 0%, #0a0d1e 55%, #170b28 100%);
+  font-family: $font-mono;
+
+  /* 底部透视霓虹网格 */
   &::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.4); /* 半透明黑色遮罩 */
-    z-index: -1;
+    left: -12%;
+    right: -12%;
+    bottom: -3%;
+    height: 46%;
+    background-image:
+      linear-gradient(rgba(0, 212, 255, 0.20) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 212, 255, 0.20) 1px, transparent 1px);
+    background-size: 44px 44px;
+    transform: perspective(460px) rotateX(58deg);
+    transform-origin: bottom center;
+    mask-image: linear-gradient(to top, black 10%, transparent 82%);
+    -webkit-mask-image: linear-gradient(to top, black 10%, transparent 82%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* CRT 扫描线 */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+    background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.028) 0 1px, transparent 1px 3px);
   }
 
   .glass-panel {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 20px;
-    padding: 40px;
+    position: relative;
+    z-index: 2;
     width: 100%;
     max-width: 450px;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-    position: relative;
-    z-index: 1;
+    padding: 40px;
+    background: rgba(9, 11, 24, 0.76);
+    border: 1px solid rgba(0, 212, 255, 0.38);
+    border-radius: 6px;
+    box-shadow:
+      0 0 0 1px rgba(255, 45, 146, 0.10),
+      0 0 46px rgba(0, 212, 255, 0.20),
+      inset 0 0 70px rgba(0, 212, 255, 0.045);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    /* HUD 边角括号 */
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      pointer-events: none;
+    }
+    &::before {
+      top: 7px;
+      left: 7px;
+      border-top: 2px solid #00d4ff;
+      border-left: 2px solid #00d4ff;
+      opacity: 0.9;
+    }
+    &::after {
+      bottom: 7px;
+      right: 7px;
+      border-bottom: 2px solid #ff2d92;
+      border-right: 2px solid #ff2d92;
+      opacity: 0.9;
+    }
 
     .title {
-      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: #e6f6ff;
       text-align: center;
       margin-bottom: 30px;
-      font-size: 28px;
-      font-weight: 600;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.10em;
+      text-shadow: 0 0 16px rgba(0, 212, 255, 0.4);
+
+      svg {
+        color: #00d4ff;
+        flex-shrink: 0;
+      }
     }
 
     .login-form {
@@ -241,35 +304,45 @@ onUnmounted(() => {
         margin-bottom: 25px;
 
         .el-form-item__label {
-          color: #fff;
+          color: #9fd7ff;
           font-weight: 500;
-          font-size: 15px;
+          font-size: 13px;
+          letter-spacing: 0.04em;
         }
 
         .el-form-item__content {
           .el-input__wrapper {
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
+            background: rgba(6, 8, 18, 0.55);
+            border: 1px solid rgba(0, 212, 255, 0.28);
+            border-radius: 4px;
             box-shadow: none;
+            transition: all 0.2s;
 
             &:hover {
-              box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5);
+              border-color: rgba(0, 212, 255, 0.55);
+              box-shadow: 0 0 10px rgba(0, 212, 255, 0.18);
             }
 
-            &:focus-within {
-              box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6);
+            &.is-focus {
+              border-color: #00d4ff;
+              box-shadow: 0 0 0 1px rgba(0, 212, 255, 0.4), 0 0 18px rgba(0, 212, 255, 0.25);
             }
 
             .el-input__inner {
-              color: #fff;
+              color: #e6f6ff;
               font-size: 15px;
+              font-family: $font-mono;
+              caret-color: #00d4ff;
+            }
+
+            .el-input__inner::placeholder {
+              color: rgba(147, 164, 200, 0.55);
             }
 
             .el-input__prefix,
             .el-input__suffix {
               .el-input__icon {
-                color: rgba(255, 255, 255, 0.7);
+                color: #7fe9ff;
               }
             }
           }
@@ -287,77 +360,79 @@ onUnmounted(() => {
         .send-code-btn {
           flex-shrink: 0;
           height: 40px;
-          background: rgba(255, 255, 255, 0.2);
-          border: 1px solid rgba(255, 255, 255, 0.3);
-          color: #fff;
-          border-radius: 10px;
+          background: rgba(0, 212, 255, 0.06);
+          border: 1px solid rgba(0, 212, 255, 0.45);
+          color: #7fe9ff;
+          border-radius: 4px;
+          font-family: $font-mono;
           font-weight: 500;
-          transition: all 0.3s ease;
+          font-size: 13px;
+          letter-spacing: 0.04em;
+          transition: all 0.2s;
 
-          &:hover {
-            background: rgba(255, 255, 255, 0.3);
-            border-color: rgba(255, 255, 255, 0.5);
+          &:hover:not(:disabled) {
+            background: rgba(0, 212, 255, 0.14);
+            border-color: #00d4ff;
+            color: #c9f6ff;
+            box-shadow: 0 0 14px rgba(0, 212, 255, 0.3);
             cursor: pointer;
           }
 
           &:disabled {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
-            color: rgba(255, 255, 255, 0.7);
+            opacity: 0.55;
             cursor: not-allowed;
-            opacity: 0.8;
           }
 
-
           &.counting {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.4);
-            color: rgba(255, 255, 255, 0.9);
-            box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+            border-color: #ff2d92;
+            color: #ffb3d6;
+            background: rgba(255, 45, 146, 0.10);
+            box-shadow: 0 0 12px rgba(255, 45, 146, 0.28);
             animation: pulse 1.5s infinite alternate;
           }
         }
       }
 
       .login-btn {
-        background: rgba(255, 255, 255, 0.9);
+        background: linear-gradient(135deg, #00d4ff, #0072ff);
         border: none;
-        color: #667eea;
-        font-weight: 600;
-        font-size: 16px;
-        border-radius: 12px;
+        color: #02121c;
+        font-family: $font-mono;
+        font-weight: 700;
+        font-size: 15px;
+        letter-spacing: 0.12em;
+        border-radius: 4px;
         height: 48px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 0 22px rgba(0, 212, 255, 0.4);
+        transition: all 0.2s;
 
-        &:hover {
-          background: rgba(255, 255, 255, 1);
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        &:hover:not(:disabled) {
+          background: linear-gradient(135deg, #33ddff, #2f8bff);
+          transform: translateY(-1px);
+          box-shadow: 0 0 30px rgba(0, 212, 255, 0.55);
         }
 
         &:disabled {
-          background: rgba(255, 255, 255, 0.3);
-          color: rgba(255, 255, 255, 0.5);
+          opacity: 0.4;
           cursor: not-allowed;
           transform: none;
+          box-shadow: none;
         }
       }
     }
   }
 }
 
-
 @keyframes pulse {
   from {
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
-    opacity: 0.8;
+    box-shadow: 0 0 8px rgba(255, 45, 146, 0.2);
+    opacity: 0.85;
   }
   to {
-    box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 16px rgba(255, 45, 146, 0.5);
     opacity: 1;
   }
 }
-
 
 @media (max-width: 768px) {
   .login-container {
@@ -366,7 +441,8 @@ onUnmounted(() => {
       max-width: 100%;
 
       .title {
-        font-size: 24px;
+        font-size: 21px;
+        letter-spacing: 0.06em;
       }
 
       .code-input-wrapper {
@@ -380,10 +456,27 @@ onUnmounted(() => {
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .login-container .login-form .send-code-btn.counting {
+    animation: none;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
+
 :deep(.el-message) {
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  background: rgba(9, 11, 24, 0.94);
+  border: 1px solid rgba(0, 212, 255, 0.4);
+  color: #dff6ff;
+  border-radius: 4px;
+  box-shadow: 0 0 22px rgba(0, 212, 255, 0.25);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  font-family: $font-mono;
+}
+
+:deep(.el-message .el-message__content) {
+  color: inherit;
 }
 </style>
