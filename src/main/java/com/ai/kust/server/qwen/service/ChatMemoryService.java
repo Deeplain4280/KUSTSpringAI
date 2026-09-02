@@ -13,4 +13,11 @@ public interface ChatMemoryService {
     //读取历史对话
     List<ChatMessageResponse> getMessages(String conversationId);
 
+    void updateTitle(String id, String title);
+
+    public void deleteConversation(String conversationId);
+
+    void clearAll(String userEmail);
+
+    void clearMemory(String sessionId);
 }

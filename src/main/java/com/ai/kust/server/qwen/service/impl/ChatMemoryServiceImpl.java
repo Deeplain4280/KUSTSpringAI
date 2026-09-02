@@ -10,7 +10,9 @@ import com.ai.kust.server.qwen.models.entity.vo.ChatMessageResponse;
 import com.ai.kust.server.qwen.service.ChatMemoryService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -49,6 +51,45 @@ public class ChatMemoryServiceImpl implements ChatMemoryService {
                         m.getContent()))
                 .toList();
     }
+
+    public void updateTitle(String id, String title) {
+        checkExists(id);
+        ChatConversation conversation = new ChatConversation();
+        conversation.setId(id);
+        conversation.setTitle(title);
+        conversationMapper.updateById(conversation);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteConversation(String conversationId) {
+        checkExists(conversationId);
+        memoryMapper.delete(new LambdaQueryWrapper<SpringAIChatMemory>()
+                .eq(SpringAIChatMemory::getConversationId, conversationId));
+        conversationMapper.deleteById(conversationId);
+    }
+
+    /** 清空用户全部对话（含记忆） */
+    @Transactional(rollbackFor = Exception.class)
+    public void clearAll(String userEmail) {
+        List<String> ids = listConversation(userEmail).stream()
+                .map(ChatConversation::getId)
+                .toList();
+        if (ids.isEmpty()) {
+            return;
+        }
+        memoryMapper.delete(new LambdaQueryWrapper<SpringAIChatMemory>()
+                .in(SpringAIChatMemory::getConversationId, ids));
+        conversationMapper.delete(new LambdaQueryWrapper<ChatConversation>()
+                .in(ChatConversation::getId, ids));
+    }
+
+    public void clearMemory(String sessionId) {
+        memoryMapper.delete(new LambdaQueryWrapper<SpringAIChatMemory>()
+                .eq(SpringAIChatMemory::getConversationId, sessionId));
+    }
+
+
+
 
 
 

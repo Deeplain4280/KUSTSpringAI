@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RequestMapping("/api/chat")
 @RestController
@@ -30,5 +31,29 @@ public class ChatMemoryController {
     @GetMapping("/messages")
     public  Result<List<ChatMessageResponse>> messages(@RequestParam String conversationId) {
         return Result.success((chatService.getMessages(conversationId)));
+    }
+
+    @PostMapping("/updateTitle")
+    public Result<Void> updateTitle(@RequestBody Map<String, String> p) {
+        chatService.updateTitle(p.get("id"), p.get("title"));
+        return Result.success();
+    }
+
+    @DeleteMapping("/{id}")
+    public Result<Void> delete(@PathVariable String id) {
+        chatService.deleteConversation(id);
+        return Result.success();
+    }
+
+    @DeleteMapping("/clearAll")
+    public Result<Void> clearAll(@RequestParam String userEmail) {
+        chatService.clearAll(userEmail);
+        return Result.success();
+    }
+
+    @DeleteMapping("/memory/{sessionId}")
+    public Result<Void> clearMemory(@PathVariable String sessionId) {
+        chatService.clearMemory(sessionId);
+        return Result.success();
     }
 }
