@@ -15,6 +15,7 @@ public enum ResultCode {
     INTERNAL_ERROR(500, "内部系统错误", 500),
 
     AI_CALL_FAILED(1001, "AI服务器繁忙，请稍后重试", 502),
+    CHAT_CONVERSATION_NOT_FOUND(1002, "对话不存在", 404),
 
     //登录相关
     VERIFY_CODE_EXPIRED(40101, "验证码已过期，请重新获取", 401),
