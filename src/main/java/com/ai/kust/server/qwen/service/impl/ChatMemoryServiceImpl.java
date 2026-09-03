@@ -52,6 +52,7 @@ public class ChatMemoryServiceImpl implements ChatMemoryService {
                 .toList();
     }
 
+    @Override
     public void updateTitle(String id, String title) {
         checkExists(id);
         ChatConversation conversation = new ChatConversation();
@@ -60,6 +61,7 @@ public class ChatMemoryServiceImpl implements ChatMemoryService {
         conversationMapper.updateById(conversation);
     }
 
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteConversation(String conversationId) {
         checkExists(conversationId);
@@ -69,6 +71,7 @@ public class ChatMemoryServiceImpl implements ChatMemoryService {
     }
 
     /** 清空用户全部对话（含记忆） */
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public void clearAll(String userEmail) {
         List<String> ids = listConversation(userEmail).stream()
@@ -83,14 +86,11 @@ public class ChatMemoryServiceImpl implements ChatMemoryService {
                 .in(ChatConversation::getId, ids));
     }
 
+    @Override
     public void clearMemory(String sessionId) {
         memoryMapper.delete(new LambdaQueryWrapper<SpringAIChatMemory>()
                 .eq(SpringAIChatMemory::getConversationId, sessionId));
     }
-
-
-
-
 
 
     private void checkExists(String conversationId) {

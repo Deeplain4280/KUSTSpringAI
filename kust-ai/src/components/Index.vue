@@ -648,12 +648,16 @@ const openConversation = async (id) => {
   })
 }
 
-/* ========== ✅ 删除对话（联动清理邮件记忆） ========== */
+/* ========== ✅ 删除对话（后端 deleteConversation 已联动删除该会话记忆） ========== */
 const deleteConversation = async (id) => {
   try {
     await chatApi.delete(id)
-    // 联动清理邮件智能体记忆（后端若无此接口可忽略报错）
-    chatApi.clearEmailMemory(id).catch(() => {})
+    // 若删除的是正在对话中的会话，先停止进行中的流式输出
+    if (activeId.value === id) {
+      stopAllStreams()
+      isTyping.value = false
+    }
+    // 本地列表即时移除，UI 刷新
     conversations.value = conversations.value.filter((c) => c.id !== id)
     if (activeId.value === id) activeId.value = null
     showToast('对话已删除')
