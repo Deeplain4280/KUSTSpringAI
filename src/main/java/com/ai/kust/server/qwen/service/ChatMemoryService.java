@@ -15,7 +15,7 @@ public interface ChatMemoryService {
 
     void updateTitle(String id, String title);
 
-    public void deleteConversation(String conversationId);
+    void deleteConversation(String conversationId);
 
     void clearAll(String userEmail);
 
