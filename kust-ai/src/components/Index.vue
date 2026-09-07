@@ -51,6 +51,13 @@
           <span class="badge badge-email">Agent</span>
         </button>
 
+        <!-- ✅ 图片创作 Agent 入口 -->
+        <button class="menu-item" :class="{ active: agentMode === 'media' }" @click="switchAgentMode('media')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          图片创作
+          <span class="badge badge-email">Agent</span>
+        </button>
+
         <div class="section-title">对话分组</div>
         <button class="menu-item text-gray" @click="showToast('已创建新分组（模拟）')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -111,6 +118,11 @@
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22,6 12,13 2,6"/></svg>
             <span>邮件助手</span>
           </span>
+          <!-- ✅ 图片创作模式标识 -->
+          <span v-else-if="agentMode === 'media'" class="mode-badge email-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            <span>图片创作</span>
+          </span>
         </div>
         <button class="icon-btn" title="删除该对话" @click="deleteConversation(activeConversation.id)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -122,6 +134,7 @@
         <div v-for="(m, i) in activeConversation.messages" :key="i" class="message-row" :class="m.role">
           <div class="msg-avatar ai-avatar" v-if="m.role === 'ai'">
             <svg v-if="agentMode === 'email'" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6" fill="none" stroke="white" stroke-width="2"/></svg>
+            <svg v-else-if="agentMode === 'media'" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="white"/><path d="M21 15l-5-5L5 21" fill="none" stroke="white" stroke-width="2"/></svg>
             <svg v-else width="20" height="20" viewBox="0 0 100 100" fill="currentColor"><path d="M50 5 L93 27.5 V72.5 L50 95 L7 72.5 V27.5 Z"/><circle cx="50" cy="50" r="14" fill="white"/></svg>
           </div>
 
@@ -161,6 +174,12 @@
               <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
               <polyline points="22,6 12,13 2,6" fill="none" stroke="white" stroke-width="2"/>
             </svg>
+            <!-- ✅ 图片创作模式图标 -->
+            <svg v-else-if="agentMode === 'media'" width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5" fill="white"/>
+              <path d="M21 15l-5-5L5 21" fill="none" stroke="white" stroke-width="2"/>
+            </svg>
             <!-- 普通模式图标 -->
             <svg v-else width="48" height="48" viewBox="0 0 100 100" fill="currentColor">
               <path d="M50 5 L93 27.5 V72.5 L50 95 L7 72.5 V27.5 Z" opacity="0.9"/>
@@ -168,10 +187,13 @@
             </svg>
           </div>
           <h1 class="welcome-text">
-            {{ agentMode === 'email' ? '你好，我们今天发送什么' : '你好，我们今天构建什么？' }}
+            {{ agentMode === 'email' ? '你好，我们今天发送什么' : agentMode === 'media' ? '你好，今天想创作什么？' : '你好，我们今天构建什么？' }}
           </h1>
           <p v-if="agentMode === 'email'" class="welcome-sub">
             告诉我你想发什么邮件，我来帮你起草、修改和发送
+          </p>
+          <p v-else-if="agentMode === 'media'" class="welcome-sub">
+            描述你想要的画面或视频内容，我来帮你生成
           </p>
         </div>
       </div>
@@ -181,7 +203,7 @@
         <div class="input-box" :class="{ 'email-mode': agentMode === 'email' }">
           <textarea
             v-model="inputText"
-            :placeholder="agentMode === 'email' ? '描述你的邮件需求，如：帮我写一封请假邮件...' : '你好主人，请问有什么可以帮你？'"
+            :placeholder="agentMode === 'email' ? '描述你的邮件需求，如：帮我写一封请假邮件...' : agentMode === 'media' ? '描述你想画的画面或视频内容，如：一只戴圆框眼镜的柴犬，写实风格' : '你好主人，请问有什么可以帮你？'"
             rows="1"
             @input="autoResize"
             @keydown="onKeydown"
@@ -221,6 +243,21 @@
                 </svg>
                 <span>邮件助手</span>
                 <span v-if="agentMode === 'email'" class="tag-purple">活跃</span>
+              </button>
+
+              <!-- ✅ 图片创作切换按钮 -->
+              <button
+                class="tool-group"
+                :class="{ 'tool-active': agentMode === 'media' }"
+                @click="switchAgentMode('media')"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <path d="M21 15l-5-5L5 21"/>
+                </svg>
+                <span>图片创作</span>
+                <span v-if="agentMode === 'media'" class="tag-purple">活跃</span>
               </button>
 
               <button class="tool-group" @click="showToast('「工作助理」已连接本地电脑（模拟）')">
@@ -263,7 +300,7 @@
           </div>
         </div>
         <p class="disclaimer">
-          {{ agentMode === 'email' ? '邮件内容由 AI 辅助生成，发送前请仔细确认' : '内容由 AI 生成，仅供参考' }}
+          {{ agentMode === 'email' ? '邮件内容由 AI 辅助生成，发送前请仔细确认' : agentMode === 'media' ? '生成图片/视频需要一些时间，结果链接约24小时有效' : '内容由 AI 生成，仅供参考' }}
         </p>
       </div>
     </main>
@@ -368,7 +405,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { streamChat, streamEmailChat, stopAllStreams } from '../assets/ts/sse'
+import { streamChat, streamEmailChat, streamMediaChat, stopAllStreams } from '../assets/ts/sse'
 import { chatApi } from '../assets/ts/index'
 import { renderMarkdown, renderMermaidBlocks } from '../assets/ts/markdown'
 
@@ -408,7 +445,7 @@ const lastIsUser = computed(() => {
 })
 
 /* ========== ✅ 智能体模式（不再需要独立的 emailSessionId） ========== */
-const agentMode = ref('chat') // 'chat' | 'email'
+const agentMode = ref('chat') // 'chat' | 'email' | 'media'
 
 const switchAgentMode = (mode) => {
   if (agentMode.value === mode) {
@@ -418,6 +455,11 @@ const switchAgentMode = (mode) => {
     agentMode.value = mode
     if (mode === 'email') {
       showToast('已切换到邮件助手模式')
+      if (!activeConversation.value) {
+        newChat()
+      }
+    } else if (mode === 'media') {
+      showToast('已切换到图片创作模式')
       if (!activeConversation.value) {
         newChat()
       }
@@ -528,7 +570,7 @@ const newChat = async () => {
     return
   }
   const newId = Date.now().toString()
-  const title = agentMode.value === 'email' ? '📧 邮件助手' : '新建对话'
+  const title = agentMode.value === 'email' ? '📧 邮件助手' : agentMode.value === 'media' ? '🎨 图片创作' : '新建对话'
   try {
     await chatApi.create({ id: newId, userEmail: userEmail.value, title })
   } catch (e) { showToast('创建对话失败'); return }
@@ -587,6 +629,52 @@ const sendMessage = async () => {
     }
     if (!messagesRef.value) nextTick(() => nextTick(doEmailStream))
     else doEmailStream()
+    return
+  }
+
+  /* -------- 图片创作智能体模式 -------- */
+  if (agentMode.value === 'media') {
+    let conv = activeConversation.value
+
+    // 兜底：无活跃对话时自动创建
+    if (!conv) {
+      const newId = Date.now().toString()
+      const newTitle = '🎨 ' + text.slice(0, 12) + (text.length > 12 ? '...' : '')
+      try {
+        await chatApi.create({ id: newId, userEmail: userEmail.value, title: newTitle })
+      } catch (e) { showToast('创建对话失败'); return }
+      conversations.value.unshift({ id: newId, title: newTitle, messages: [] })
+      activeId.value = newId
+      conv = conversations.value[0]
+    }
+
+    // 首条消息改标题
+    if (conv.messages.length === 0 && (conv.title === '🎨 图片创作' || conv.title === '新建对话')) {
+      const newTitle = '🎨 ' + text.slice(0, 12) + (text.length > 12 ? '...' : '')
+      conv.title = newTitle
+      chatApi.updateTitle(conv.id, newTitle).catch(() => {})
+    }
+
+    // 用户消息上屏
+    conv.messages.push({ role: 'user', content: text })
+    inputText.value = ''
+    autoResize()
+    nextTick(() => scrollEl(messagesRef.value))
+
+    // ✅ 复用 conv.id 作为 sessionId
+    const doMediaStream = () => {
+      streamMediaChat({
+        question: text,
+        sessionId: conv.id,
+        messages: conv.messages,
+        typingRef: isTyping,
+        scrollFn: () => scrollEl(messagesRef.value),
+        onComplete: () => afterRender(),
+        onError: () => showToast('图片创作助手连接异常'),
+      })
+    }
+    if (!messagesRef.value) nextTick(() => nextTick(doMediaStream))
+    else doMediaStream()
     return
   }
 

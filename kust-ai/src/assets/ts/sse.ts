@@ -170,9 +170,87 @@ export function streamEmailChat(options: EmailStreamOptions): void {
   }
 }
 
+/* ==================== 图片创作智能体 SSE ==================== */
+
+interface MediaStreamOptions {
+  question: string
+  sessionId: string
+  messages: Message[]
+  typingRef: Ref<boolean>
+  scrollFn?: () => void
+  onComplete?: () => void
+  onError?: () => void
+}
+
+let mediaES: EventSource | null = null
+
+export function stopMediaStream(): void {
+  if (mediaES) {
+    mediaES.close()
+    mediaES = null
+  }
+}
+
+export function streamMediaChat(options: MediaStreamOptions): void {
+  const { question, sessionId, messages, typingRef, scrollFn, onComplete, onError } = options
+
+  stopMediaStream()
+
+  const params = new URLSearchParams({
+    userInput: question,
+    sessionId: sessionId || 'default',
+  })
+  const fullUrl = `/api/media-agent/chat?${params.toString()}`
+
+  typingRef.value = true
+
+  let aiMsgIndex = -1
+  let hasReceivedData = false
+
+  const es = new EventSource(fullUrl)
+  mediaES = es
+
+  es.onmessage = (event: MessageEvent) => {
+    if (event.data === '[DONE]') {
+      cleanup()
+      onComplete?.()
+      return
+    }
+    // 跳过空心跳 chunk
+    if (event.data === '') return
+
+    if (!hasReceivedData) {
+      hasReceivedData = true
+      messages.push({ role: 'ai', content: '' })
+      aiMsgIndex = messages.length - 1
+      typingRef.value = false
+    }
+    messages[aiMsgIndex].content += event.data
+    scrollFn?.()
+  }
+
+  es.onerror = () => {
+    if (hasReceivedData) {
+      cleanup()
+      onComplete?.()
+      return
+    }
+    messages.push({ role: 'ai', content: '⚠️ 图片创作助手连接失败，请重试' })
+    cleanup()
+    onError?.()
+  }
+
+  function cleanup(): void {
+    es.close()
+    if (mediaES === es) mediaES = null
+    typingRef.value = false
+  }
+}
+
 /* ==================== 统一停止所有流 ==================== */
 
 export function stopAllStreams(): void {
   stopStream()
   stopEmailStream()
+  stopMediaStream()
 }
