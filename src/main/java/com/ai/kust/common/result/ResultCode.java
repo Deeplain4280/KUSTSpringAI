@@ -17,6 +17,12 @@ public enum ResultCode {
     AI_CALL_FAILED(1001, "AI服务器繁忙，请稍后重试", 502),
     CHAT_CONVERSATION_NOT_FOUND(1002, "对话不存在", 404),
 
+    // ==================== 多模态生成 (11xx) ====================
+    MEDIA_GENERATION_FAILED(1101, "内容生成失败，请稍后重试", 502),
+    MEDIA_TASK_NOT_FOUND(1102, "生成任务不存在或已过期", 404),
+    MEDIA_TASK_PENDING(1103, "生成任务处理中，请稍后查询", 200),
+    MEDIA_FILE_SAVE_FAILED(1104, "生成结果保存失败，请稍后重试", 500),
+
     //登录相关
     VERIFY_CODE_EXPIRED(40101, "验证码已过期，请重新获取", 401),
     VERIFY_CODE_ERROR(40201, "验证码输入错误，请重新输入", 402),
