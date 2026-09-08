@@ -58,6 +58,13 @@
           <span class="badge badge-email">Agent</span>
         </button>
 
+        <!-- ✅ 识图反推 Agent 入口 -->
+        <button class="menu-item" :class="{ active: agentMode === 'image' }" @click="switchAgentMode('image')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><path d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>
+          识图反推
+          <span class="badge badge-email">Agent</span>
+        </button>
+
         <div class="section-title">对话分组</div>
         <button class="menu-item text-gray" @click="showToast('已创建新分组（模拟）')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -123,6 +130,11 @@
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
             <span>图片创作</span>
           </span>
+          <!-- ✅ 识图反推模式标识 -->
+          <span v-else-if="agentMode === 'image'" class="mode-badge email-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>识图反推</span>
+          </span>
         </div>
         <button class="icon-btn" title="删除该对话" @click="deleteConversation(activeConversation.id)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -135,11 +147,15 @@
           <div class="msg-avatar ai-avatar" v-if="m.role === 'ai'">
             <svg v-if="agentMode === 'email'" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6" fill="none" stroke="white" stroke-width="2"/></svg>
             <svg v-else-if="agentMode === 'media'" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5" fill="white"/><path d="M21 15l-5-5L5 21" fill="none" stroke="white" stroke-width="2"/></svg>
+            <svg v-else-if="agentMode === 'image'" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3" fill="white"/><path d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" fill="white"/></svg>
             <svg v-else width="20" height="20" viewBox="0 0 100 100" fill="currentColor"><path d="M50 5 L93 27.5 V72.5 L50 95 L7 72.5 V27.5 Z"/><circle cx="50" cy="50" r="14" fill="white"/></svg>
           </div>
 
           <div v-if="m.role === 'ai'" class="bubble ai markdown-body" v-html="toHtml(m.content, isTyping)"></div>
-          <div v-else class="bubble user">{{ m.content }}</div>
+          <div v-else class="bubble user">
+            <img v-if="m.image" :src="m.image" class="user-msg-img" alt="用户图片" />
+            <div v-if="m.content">{{ m.content }}</div>
+          </div>
 
           <div class="msg-avatar user-avatar" v-if="m.role === 'user'">
             <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" />
@@ -180,6 +196,11 @@
               <circle cx="8.5" cy="8.5" r="1.5" fill="white"/>
               <path d="M21 15l-5-5L5 21" fill="none" stroke="white" stroke-width="2"/>
             </svg>
+            <!-- ✅ 识图反推模式图标 -->
+            <svg v-else-if="agentMode === 'image'" width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3" fill="white"/>
+            </svg>
             <!-- 普通模式图标 -->
             <svg v-else width="48" height="48" viewBox="0 0 100 100" fill="currentColor">
               <path d="M50 5 L93 27.5 V72.5 L50 95 L7 72.5 V27.5 Z" opacity="0.9"/>
@@ -187,13 +208,16 @@
             </svg>
           </div>
           <h1 class="welcome-text">
-            {{ agentMode === 'email' ? '你好，我们今天发送什么' : agentMode === 'media' ? '你好，今天想创作什么？' : '你好，我们今天构建什么？' }}
+            {{ agentMode === 'email' ? '你好，我们今天发送什么' : agentMode === 'media' ? '你好，今天想创作什么？' : agentMode === 'image' ? '上传图片，反推它的提示词' : '你好，我们今天构建什么？' }}
           </h1>
           <p v-if="agentMode === 'email'" class="welcome-sub">
             告诉我你想发什么邮件，我来帮你起草、修改和发送
           </p>
           <p v-else-if="agentMode === 'media'" class="welcome-sub">
             描述你想要的画面或视频内容，我来帮你生成
+          </p>
+          <p v-else-if="agentMode === 'image'" class="welcome-sub">
+            上传一张图片，我帮你逆向还原可直接复现它的提示词，支持多轮追问改写
           </p>
         </div>
       </div>
@@ -203,16 +227,37 @@
         <div class="input-box" :class="{ 'email-mode': agentMode === 'email' }">
           <textarea
             v-model="inputText"
-            :placeholder="agentMode === 'email' ? '描述你的邮件需求，如：帮我写一封请假邮件...' : agentMode === 'media' ? '描述你想画的画面或视频内容，如：一只戴圆框眼镜的柴犬，写实风格' : '你好主人，请问有什么可以帮你？'"
+            :placeholder="agentMode === 'email' ? '描述你的邮件需求，如：帮我写一封请假邮件...' : agentMode === 'media' ? '描述你想画的画面或视频内容，如：一只戴圆框眼镜的柴犬，写实风格' : agentMode === 'image' ? '可先上传图片，再输入要求，如：反推提示词 / 把风格改成水墨画...' : '你好主人，请问有什么可以帮你？'"
             rows="1"
             @input="autoResize"
             @keydown="onKeydown"
             ref="textareaRef"
           ></textarea>
 
+          <!-- ✅ 识图反推：已选图片预览条 -->
+          <div v-if="agentMode === 'image' && attachImage" class="attach-row">
+            <img :src="attachDataUrl" class="attach-thumb" alt="预览" />
+            <span class="attach-name">{{ attachImage.name }}</span>
+            <span class="attach-tip">发送后将识别该图片并反推提示词</span>
+            <button class="attach-remove" title="移除图片" @click="removeAttachImage">✕</button>
+          </div>
+
           <div class="input-actions">
             <div class="action-left">
-              <button class="tool-btn" title="添加" @click="showToast('附件上传（模拟）')">
+              <!-- ✅ 识图反推：真实的图片上传（替换模拟附件按钮） -->
+              <template v-if="agentMode === 'image'">
+                <input
+                  ref="imageInputRef"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  class="hidden-file-input"
+                  @change="onPickImage"
+                />
+                <button class="tool-btn" :class="{ 'tool-active': !!attachImage }" title="上传图片" @click="imageInputRef?.click()">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                </button>
+              </template>
+              <button v-else class="tool-btn" title="添加" @click="showToast('附件上传（模拟）')">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               </button>
 
@@ -260,6 +305,20 @@
                 <span v-if="agentMode === 'media'" class="tag-purple">活跃</span>
               </button>
 
+              <!-- ✅ 识图反推切换按钮 -->
+              <button
+                class="tool-group"
+                :class="{ 'tool-active': agentMode === 'image' }"
+                @click="switchAgentMode('image')"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span>识图反推</span>
+                <span v-if="agentMode === 'image'" class="tag-purple">活跃</span>
+              </button>
+
               <button class="tool-group" @click="showToast('「工作助理」已连接本地电脑（模拟）')">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                 <span>工作助理</span>
@@ -293,14 +352,14 @@
               <button class="icon-btn-sm" title="语音输入" @click="showToast('语音输入（模拟）')">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
               </button>
-              <button class="send-btn" :class="{ active: inputText.trim() }" title="发送" @click="sendMessage">
+              <button class="send-btn" :class="{ active: canSend }" title="发送" @click="sendMessage">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
               </button>
             </div>
           </div>
         </div>
         <p class="disclaimer">
-          {{ agentMode === 'email' ? '邮件内容由 AI 辅助生成，发送前请仔细确认' : agentMode === 'media' ? '生成图片/视频需要一些时间，结果链接约24小时有效' : '内容由 AI 生成，仅供参考' }}
+          {{ agentMode === 'email' ? '邮件内容由 AI 辅助生成，发送前请仔细确认' : agentMode === 'media' ? '生成图片/视频需要一些时间，结果链接约24小时有效' : agentMode === 'image' ? '图片仅用于本次识别，支持 jpeg/png/webp/gif，单张不超过10MB' : '内容由 AI 生成，仅供参考' }}
         </p>
       </div>
     </main>
@@ -405,7 +464,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { streamChat, streamEmailChat, streamMediaChat, stopAllStreams } from '../assets/ts/sse'
+import { streamChat, streamEmailChat, streamMediaChat, streamImageChat, stopAllStreams } from '../assets/ts/sse'
 import { chatApi } from '../assets/ts/index'
 import { renderMarkdown, renderMermaidBlocks } from '../assets/ts/markdown'
 
@@ -445,7 +504,7 @@ const lastIsUser = computed(() => {
 })
 
 /* ========== ✅ 智能体模式（不再需要独立的 emailSessionId） ========== */
-const agentMode = ref('chat') // 'chat' | 'email' | 'media'
+const agentMode = ref('chat') // 'chat' | 'email' | 'media' | 'image'
 
 const switchAgentMode = (mode) => {
   if (agentMode.value === mode) {
@@ -463,9 +522,49 @@ const switchAgentMode = (mode) => {
       if (!activeConversation.value) {
         newChat()
       }
+    } else if (mode === 'image') {
+      showToast('已切换到识图反推模式')
+      if (!activeConversation.value) {
+        newChat()
+      }
     }
   }
 }
+
+/* ========== ✅ 识图反推：图片选择 ========== */
+const imageInputRef = ref(null)
+const attachImage = ref(null) // 待发送的图片 File
+const attachDataUrl = ref('') // 本地预览用 data URL
+
+const onPickImage = (e) => {
+  const f = e.target?.files?.[0]
+  if (e.target) e.target.value = ''
+  if (!f) return
+  const okTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+  if (!okTypes.includes(f.type)) {
+    showToast('仅支持 jpeg/png/webp/gif 格式的图片')
+    return
+  }
+  if (f.size > 10 * 1024 * 1024) {
+    showToast('图片不能超过 10MB')
+    return
+  }
+  attachImage.value = f
+  const reader = new FileReader()
+  reader.onload = () => { attachDataUrl.value = String(reader.result || '') }
+  reader.readAsDataURL(f)
+  showToast('图片已选择，输入要求后发送即可')
+}
+
+const removeAttachImage = () => {
+  attachImage.value = null
+  attachDataUrl.value = ''
+}
+
+/** 发送按钮可用：有文字，或识图模式下已选图片 */
+const canSend = computed(
+  () => inputText.value.trim().length > 0 || (agentMode.value === 'image' && !!attachImage.value)
+)
 
 /* ---- Markdown 渲染辅助 ---- */
 const toHtml = (content, streaming = false) => renderMarkdown(content || '', streaming)
@@ -570,7 +669,7 @@ const newChat = async () => {
     return
   }
   const newId = Date.now().toString()
-  const title = agentMode.value === 'email' ? '📧 邮件助手' : agentMode.value === 'media' ? '🎨 图片创作' : '新建对话'
+  const title = agentMode.value === 'email' ? '📧 邮件助手' : agentMode.value === 'media' ? '🎨 图片创作' : agentMode.value === 'image' ? '🖼 识图反推' : '新建对话'
   try {
     await chatApi.create({ id: newId, userEmail: userEmail.value, title })
   } catch (e) { showToast('创建对话失败'); return }
@@ -584,7 +683,60 @@ const newChat = async () => {
 /* ========== ✅ 发送消息（邮件智能体使用 conv.id 作为 sessionId） ========== */
 const sendMessage = async () => {
   const text = inputText.value.trim()
-  if (!text || isTyping.value) return
+  if (isTyping.value) return
+  // 普通/邮件/图片模式必须有文字；识图模式允许只传图片
+  if (!text && !(agentMode.value === 'image' && attachImage.value)) return
+
+  /* -------- 识图反推智能体模式 -------- */
+  if (agentMode.value === 'image') {
+    let conv = activeConversation.value
+    const question = text || '识别这张图片，反推可以复现它的提示词'
+    const displayText = text || '（已上传图片）'
+
+    // 兜底：无活跃对话时自动创建
+    if (!conv) {
+      const newId = Date.now().toString()
+      const newTitle = '🖼 ' + (text || '识图反推').slice(0, 12) + ((text || '识图反推').length > 12 ? '...' : '')
+      try {
+        await chatApi.create({ id: newId, userEmail: userEmail.value, title: newTitle })
+      } catch (e) { showToast('创建对话失败'); return }
+      conversations.value.unshift({ id: newId, title: newTitle, messages: [] })
+      activeId.value = newId
+      conv = conversations.value[0]
+    }
+
+    // 首条消息改标题
+    if (conv.messages.length === 0 && (conv.title === '🖼 识图反推' || conv.title === '新建对话')) {
+      const newTitle = '🖼 ' + (text || '识图反推').slice(0, 12) + ((text || '识图反推').length > 12 ? '...' : '')
+      conv.title = newTitle
+      chatApi.updateTitle(conv.id, newTitle).catch(() => {})
+    }
+
+    // 用户消息上屏（含本地图片预览；历史记录只存文字）
+    conv.messages.push({ role: 'user', content: displayText, image: attachDataUrl.value || '' })
+    inputText.value = ''
+    autoResize()
+    const fileToSend = attachImage.value
+    removeAttachImage()
+    nextTick(() => scrollEl(messagesRef.value))
+
+    // ✅ 复用 conv.id 作为 sessionId；POST multipart + SSE
+    const doImageStream = () => {
+      streamImageChat({
+        file: fileToSend,
+        question,
+        sessionId: conv.id,
+        messages: conv.messages,
+        typingRef: isTyping,
+        scrollFn: () => scrollEl(messagesRef.value),
+        onComplete: () => afterRender(),
+        onError: () => showToast('识图助手连接异常'),
+      })
+    }
+    if (!messagesRef.value) nextTick(() => nextTick(doImageStream))
+    else doImageStream()
+    return
+  }
 
   /* -------- 邮件智能体模式 -------- */
   if (agentMode.value === 'email') {
@@ -806,4 +958,35 @@ onUnmounted(() => stopAllStreams())
 <style scoped>
 @import '@/assets/css/index.css';
 
+/* ===== 识图反推：上传/预览/消息图 ===== */
+.user-msg-img {
+  display: block; max-width: 100%; max-height: 240px;
+  border-radius: 4px; margin-bottom: 6px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+}
+.attach-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px;
+  border: 1px dashed var(--border-color);
+  border-radius: 4px;
+  background: var(--hover-bg);
+}
+.attach-thumb {
+  width: 44px; height: 44px; object-fit: cover;
+  border-radius: 3px; border: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+.attach-name {
+  font-size: 12px; color: var(--text-primary);
+  max-width: 200px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.attach-tip { font-size: 11px; color: var(--text-secondary); flex: 1; opacity: 0.8; }
+.attach-remove {
+  background: transparent; border: none; cursor: pointer;
+  color: var(--text-secondary); font-size: 14px; line-height: 1;
+  padding: 4px 6px; border-radius: 3px; flex-shrink: 0;
+}
+.attach-remove:hover { background: var(--border-color); color: var(--accent); }
+.hidden-file-input { display: none; }
 </style>
