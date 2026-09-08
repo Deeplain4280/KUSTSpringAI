@@ -23,6 +23,8 @@ public enum ResultCode {
     MEDIA_TASK_PENDING(1103, "生成任务处理中，请稍后查询", 200),
     MEDIA_FILE_SAVE_FAILED(1104, "生成结果保存失败，请稍后重试", 500),
 
+    IMAGE_ANALYZE_FAILED(1105, "图片识别失败，请换一张清晰图片或稍后重试", 502),
+
     //登录相关
     VERIFY_CODE_EXPIRED(40101, "验证码已过期，请重新获取", 401),
     VERIFY_CODE_ERROR(40201, "验证码输入错误，请重新输入", 402),
