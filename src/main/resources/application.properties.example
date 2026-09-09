@@ -1,0 +1,72 @@
+# =====================================================================
+# KUSTSpringAI 配置模板（无密钥，可提交仓库）
+#
+# 服务器上使用：
+#   cp src/main/resources/application.properties.example \
+#      src/main/resources/application.properties
+#   然后修改其中 ${VAR:默认值} 的默认值或直接配置环境变量覆盖
+# =====================================================================
+spring.application.name=KUSTSpringAI
+
+# ===== 服务监听 =====
+# 生产环境只绑定回环地址：外部流量统一走本机 Nginx 反向代理 (80 -> 8080)
+server.port=8080
+server.address=127.0.0.1
+
+# ===== AI 模型（阿里云百炼 DashScope 兼容模式）=====
+# 密钥优先读环境变量 AI_API_KEY（推荐），或直接替换下面的默认值
+spring.ai.openai.api-key=${AI_API_KEY:替换为你的百炼API-KEY}
+spring.ai.openai.base-url=https://ws-p0qtgi0u5bo7k8v8.cn-beijing.maas.aliyuncs.com/compatible-mode/v1
+spring.ai.openai.chat.model=qwen3.8-max
+spring.ai.openai.chat.temperature=0.8
+spring.ai.openai.chat.max-tokens=4096
+
+# ===== 日志级别（生产保持 INFO）=====
+logging.level.com.ai.kust.server=INFO
+# logging.level.com.ai.kust.server=DEBUG          # 本地调试时打开
+# logging.level.org.springframework.ai.autoconfigure.chat.memory=DEBUG
+
+# ===== 数据库（MySQL，用于对话记忆持久化）=====
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.datasource.url=${DB_URL:jdbc:mysql://127.0.0.1:3306/kust_spring_ai?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai}
+spring.datasource.username=${DB_USERNAME:root}
+spring.datasource.password=${DB_PASSWORD:替换为数据库密码}
+spring.ai.chat.memory.repository.jdbc.initialize-schema=always
+
+# ===== 邮件（QQ 邮箱 SMTP，使用授权码）=====
+spring.mail.host=smtp.qq.com
+spring.mail.port=587
+spring.mail.username=${MAIL_USERNAME:替换为发件邮箱}
+spring.mail.password=${MAIL_PASSWORD:替换为SMTP授权码}
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.connectiontimeout=5000
+spring.mail.properties.mail.smtp.timeout=5000
+spring.mail.properties.mail.smtp.writetimeout=5000
+
+# ===== 邮箱验证码 =====
+auth.code.key-prefix=atuh:code
+auth.code.expire-minutes=5
+
+# ===== MyBatis-Plus =====
+mybatis-plus.configuration.map-underscore-to-camel-case=true
+# 生产使用 slf4j：INFO 级别下不打印 SQL；本地调试可改回 StdOutImpl
+mybatis-plus.configuration.log-impl=org.apache.ibatis.logging.slf4j.Slf4jImpl
+mybatis-plus.global-config.db-config.id-type=ASSIGN_ID
+mybatis-plus.global-config.db-config.logic-delete-field=deleted
+mybatis-plus.global-config.db-config.logic-delete-value=1
+mybatis-plus.global-config.db-config.logic-not-delete-value=0
+
+# ===== 图片/视频生成（百炼原生 DashScope API）=====
+media.dashscope.base-url=https://dashscope.aliyuncs.com
+media.image.model=wan2.2-t2i-flash
+media.image.size=1024*1024
+media.video.model=wan2.2-t2v-lite
+media.video.size=1280*720
+media.video.duration=5
+media.video.poll-interval-seconds=5
+media.video.max-wait-seconds=600
+
+# ===== 文件上传（识图反推等，需与 Nginx client_max_body_size 对齐）=====
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=12MB
