@@ -71,7 +71,7 @@ export function streamChat(options: StreamChatOptions): void {
       aiMsgIndex = messages.length - 1
       typingRef.value = false
     }
-    messages[aiMsgIndex].content += event.data
+    messages[aiMsgIndex]!.content += event.data
     scrollFn?.()
   }
 
@@ -148,7 +148,7 @@ export function streamEmailChat(options: EmailStreamOptions): void {
       aiMsgIndex = messages.length - 1
       typingRef.value = false
     }
-    messages[aiMsgIndex].content += event.data
+    messages[aiMsgIndex]!.content += event.data
     scrollFn?.()
   }
 
@@ -225,7 +225,7 @@ export function streamMediaChat(options: MediaStreamOptions): void {
       aiMsgIndex = messages.length - 1
       typingRef.value = false
     }
-    messages[aiMsgIndex].content += event.data
+    messages[aiMsgIndex]!.content += event.data
     scrollFn?.()
   }
 
@@ -351,7 +351,7 @@ export function streamImageChat(options: ImageStreamOptions): void {
       aiMsgIndex = messages.length - 1
       typingRef.value = false
     }
-    messages[aiMsgIndex].content += data
+    messages[aiMsgIndex]!.content += data
     scrollFn?.()
   }
 
