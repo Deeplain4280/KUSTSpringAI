@@ -127,7 +127,7 @@ const sendCode = async () => {
 
   try {
     const response = await axios({
-      url: "http://127.0.0.1:8080/api/auth/send-code",
+      url: "/api/auth/send-code",
       headers: { "Content-Type": "application/json" },
       method: "POST",
       data: { identity: account.email },
@@ -154,7 +154,7 @@ const CodeLogin = async () => {
 
       try {
         const response = await axios({
-          url: "http://127.0.0.1:8080/api/auth/verify",
+          url: "/api/auth/verify",
           headers: { "Content-Type": "application/json" },
           method: "POST",
           data: account,
