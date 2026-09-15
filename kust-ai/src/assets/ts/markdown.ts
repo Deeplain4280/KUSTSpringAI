@@ -7,7 +7,9 @@ import 'katex/dist/katex.min.css'
 import 'highlight.js/styles/atom-one-dark.css'
 
 /* ---------- 1. markdown-it 初始化（GFM + breaks，符合聊天习惯） ---------- */
-const md = new MarkdownIt({
+// 显式标注类型：highlight 内部引用了 md，否则 TS 判定自引用导致推断为 any
+// （markdown-it v15 为 export= 类型，实例类型用 InstanceType 取）
+const md: InstanceType<typeof MarkdownIt> = new MarkdownIt({
   html: false,
   linkify: true,
   typographer: true,
@@ -47,16 +49,17 @@ md.inline.ruler.before('escape', 'math_inline', mathInline)
 
 /* ---------- 3. 块级数学公式 $$...$$ ---------- */
 md.block.ruler.before('fence', 'math_block', (state, startLine, endLine, silent) => {
-  const startPos = state.bMarks[startLine] + state.tShift[startLine]
+  // bMarks/tShift 对合法行必有值，`!` 仅用于满足 noUncheckedIndexedAccess
+  const startPos = state.bMarks[startLine]! + state.tShift[startLine]!
   if (state.src.slice(startPos, startPos + 2) !== '$$') return false
   if (silent) return true
   let nextLine = startLine + 1
   while (nextLine < endLine) {
-    const p = state.bMarks[nextLine] + state.tShift[nextLine]
+    const p = state.bMarks[nextLine]! + state.tShift[nextLine]!
     if (state.src.slice(p, p + 2) === '$$') break
     nextLine++
   }
-  const content = state.getLines(startLine + 1, nextLine, state.tShift[startLine], false)
+  const content = state.getLines(startLine + 1, nextLine, state.tShift[startLine]!, false)
   try {
     const token = state.push('html_block', '', 0)
     token.content = `<div class="math-block">${katex.renderToString(content.trim(), {
@@ -104,8 +107,8 @@ function normalizeWhitespace(text: string): string {
     out.push(line)              // ✅ 原样保留
   }
 
-  // 去掉开头空行
-  while (out.length && out[0].trim() === '') out.shift()
+  // 去掉开头空行（out[0]?. 兼容 noUncheckedIndexedAccess 下数组可能为空的推断）
+  while (out[0]?.trim() === '') out.shift()
   return out.join('\n')
 }
 

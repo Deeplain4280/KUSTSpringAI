@@ -8,7 +8,9 @@ import lombok.Data;
 
 import java.time.LocalTime;
 
-@TableName(value = "spring_ai_chat_memory")
+// 注意：必须与 Spring AI JDBC 仓库实际写入的表名一致（官方 schema 为大写）。
+// Linux MySQL 表名区分大小写，写小写会导致"写入大写表、读取小写表"两张表问题。
+@TableName(value = "SPRING_AI_CHAT_MEMORY")
 @Data
 public class SpringAIChatMemory {
 

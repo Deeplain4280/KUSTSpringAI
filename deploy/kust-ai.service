@@ -1,0 +1,33 @@
+# =====================================================================
+# KUSTSpringAI  systemd 服务单元（Linux）
+#
+# 安装：
+#   sudo cp deploy/kust-ai.service /etc/systemd/system/kust-ai.service
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now kust-ai
+#   journalctl -u kust-ai -f          # 查看日志
+# =====================================================================
+[Unit]
+Description=KUSTSpringAI (Spring Boot AI Server)
+# 按实际依赖调整服务名：本机有 MySQL/Redis 且走 systemd 时可启用下行
+# After=network.target mysql.service
+After=network.target
+
+[Service]
+Type=simple
+# 建议用非 root 用户运行：useradd -r -s /sbin/nologin kustai
+User=kustai
+WorkingDirectory=/opt/kust-ai-app
+# 环境变量密钥（务必 chmod 600）
+EnvironmentFile=/etc/kust-ai/kust-ai.env
+# 注意：jar 同目录放一份 application.properties 可覆盖 jar 内置配置
+ExecStart=/usr/bin/java -Xms256m -Xmx1024m -jar /opt/kust-ai-app/KUSTSpringAI-0.0.1-SNAPSHOT.jar
+SuccessExitStatus=143
+Restart=on-failure
+RestartSec=5
+# 日志会打到 stdout，由 journald 收集；如要落盘文件用标准 logging 配置
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
